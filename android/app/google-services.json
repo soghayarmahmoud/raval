@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "70374124423",
+    "project_id": "raval-store-app",
+    "storage_bucket": "raval-store-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:70374124423:android:f5f4c8a36511c9262a4122",
+        "android_client_info": {
+          "package_name": "com.example.store"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIOoveEG08wzogQyirhP7tfSZCiCudABo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
