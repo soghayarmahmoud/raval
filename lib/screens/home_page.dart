@@ -26,13 +26,13 @@ class ProductModel {
   ProductModel({required this.name, required this.imageUrl, required this.price, required this.id});
 }
 
-// ------------------- 2. Data Service -------------------
+// ------------------- 2. Data Service (Using Online URLs) -------------------
 class HomeDataService {
   List<BannerModel> getBanners() {
     return [
-      BannerModel(id: 'b1', imageUrl: 'https://pixabay.com/photos/woman-city-fashion-portrait-7178848/'),
-      BannerModel(id: 'b2', imageUrl: 'https://pixabay.com/photos/woman-dress-sunglasses-street-7370502/'),
-      BannerModel(id: 'b3', imageUrl: 'https://pixabay.com/photos/street-woman-telephone-booth-7259701/'),
+      BannerModel(id: 'b1', imageUrl: 'https://cdn.pixabay.com/photo/2022/07/04/18/43/woman-7301933_640.jpg'),
+      BannerModel(id: 'b2', imageUrl: 'https://cdn.pixabay.com/photo/2022/09/16/16/34/woman-7459122_640.jpg'),
+      BannerModel(id: 'b3', imageUrl: 'https://cdn.pixabay.com/photo/2022/08/11/21/25/street-7380949_640.jpg'),
     ];
   }
 
@@ -48,22 +48,22 @@ class HomeDataService {
 
   List<ProductModel> getNewArrivals() {
     return [
-      ProductModel(id: 'p1', name: 'فستان بناتي ربيعي', price: 450.00, imageUrl: 'https://pixabay.com/photos/fashion-suit-tailor-clothes-1979136/'),
-      ProductModel(id: 'p2', name: 'طقم ولادي صيفي', price: 380.50, imageUrl: 'https://pixabay.com/photos/woman-istanbul-model-clothes-918267/'),
-      ProductModel(id: 'p3', name: 'أفرول بيبي قطن', price: 299.99, imageUrl: 'https://pixabay.com/photos/fashion-female-clothes-3555650/'),
+      ProductModel(id: 'p1', name: 'فستان بناتي ربيعي', price: 450.00, imageUrl: 'https://cdn.pixabay.com/photo/2017/01/21/18/35/fashion-1998394_640.jpg'),
+      ProductModel(id: 'p2', name: 'طقم ولادي صيفي', price: 380.50, imageUrl: 'https://cdn.pixabay.com/photo/2015/11/26/00/14/woman-1062084_640.jpg'),
+      ProductModel(id: 'p3', name: 'أفرول بيبي قطن', price: 299.99, imageUrl: 'https://cdn.pixabay.com/photo/2018/07/26/08/04/fashion-3562828_640.jpg'),
     ];
   }
 
   List<ProductModel> getBestOffers() {
      return [
-      ProductModel(id: 'p4', name: 'جاكيت شتوي', price: 600.00, imageUrl: 'https://pixabay.com/photos/shirts-exhibition-store-shopping-428627/'),
-      ProductModel(id: 'p5', name: 'تنورة قصيرة', price: 320.00, imageUrl: 'https://pixabay.com/photos/dresses-embroidery-market-clothes-808321/'),
-      ProductModel(id: 'p6', name: 'بنطلون جينز', price: 410.00, imageUrl: 'https://pixabay.com/photos/skinny-jeans-denim-clothing-female-2593347/'),
+      ProductModel(id: 'p4', name: 'جاكيت شتوي', price: 600.00, imageUrl: 'https://cdn.pixabay.com/photo/2014/08/26/21/48/shirts-428627_640.jpg'),
+      ProductModel(id: 'p5', name: 'تنورة قصيرة', price: 320.00, imageUrl: 'https://cdn.pixabay.com/photo/2015/06/25/16/57/dresses-821216_640.jpg'),
+      ProductModel(id: 'p6', name: 'بنطلون جينز', price: 410.00, imageUrl: 'https://cdn.pixabay.com/photo/2017/08/01/11/42/skinny-jeans-2565092_640.jpg'),
     ];
   }
 }
 
-// ------------------- 3. Home Page UI -------------------
+// ------------------- 3. Home Page UI (Using Image.network) -------------------
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
   @override
@@ -71,6 +71,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // ... (initState, _addToCart, and other logic remains the same)
   final HomeDataService _dataService = HomeDataService();
   late List<CategoryModel> _categories;
   int _cartItemCount = 0;
@@ -95,6 +96,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // ... (DefaultTabController and Scaffold structure remains the same)
     return DefaultTabController(
       length: _categories.length,
       child: Scaffold(
@@ -137,7 +139,6 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Carousel Panel with loading and error handling
           CarouselSlider.builder(
             itemCount: banners.length,
             itemBuilder: (context, index, realIndex) {
@@ -145,49 +146,34 @@ class _HomePageState extends State<HomePage> {
                 banners[index].imageUrl, 
                 fit: BoxFit.cover, 
                 width: double.infinity,
-                // --- إضافة لتحسين عرض الصور ---
                 loadingBuilder: (context, child, progress) {
                   return progress == null ? child : const Center(child: CircularProgressIndicator());
                 },
                 errorBuilder: (context, error, stackTrace) {
                   return const Center(child: Icon(Icons.error_outline, color: Colors.red, size: 40));
                 },
-                // --- نهاية الإضافة ---
               );
             },
-            options: CarouselOptions(
-              height: 220,
-              autoPlay: true,
-              viewportFraction: 1.0,
-            ),
+            options: CarouselOptions(height: 220, autoPlay: true, viewportFraction: 1.0),
           ),
           
-          _buildProductSection(
-            title: 'وصل حديثًا',
-            products: newArrivals,
-          ),
-          
-          _buildProductSection(
-            title: 'أفضل العروض',
-            products: bestOffers,
-          ),
+          _buildProductSection(title: 'وصل حديثًا', products: newArrivals),
+          _buildProductSection(title: 'أفضل العروض', products: bestOffers),
 
           const SizedBox(height: 20),
         ],
       ),
     );
   }
-
+  
   Widget _buildProductSection({required String title, required List<ProductModel> products}) {
+    // ... (This widget's structure remains the same)
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
-          child: Text(
-            title,
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-          ),
+          child: Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
         ),
         SizedBox(
           height: 280,
@@ -212,8 +198,10 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// Custom Widget for the Cart Icon
+// --- Widgets (Using Image.network) ---
+
 class _CartIconWithBadge extends StatelessWidget {
+  // ... (This widget remains the same)
   final int itemCount;
   final VoidCallback onPressed;
 
@@ -234,16 +222,9 @@ class _CartIconWithBadge extends StatelessWidget {
             right: 8,
             child: Container(
               padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                color: AppColors.primaryPink,
-                borderRadius: BorderRadius.circular(10),
-              ),
+              decoration: BoxDecoration(color: AppColors.primaryPink, borderRadius: BorderRadius.circular(10)),
               constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-              child: Text(
-                '$itemCount',
-                style: const TextStyle(color: Colors.white, fontSize: 10),
-                textAlign: TextAlign.center,
-              ),
+              child: Text('$itemCount', style: const TextStyle(color: Colors.white, fontSize: 10), textAlign: TextAlign.center),
             ),
           ),
       ],
@@ -251,18 +232,12 @@ class _CartIconWithBadge extends StatelessWidget {
   }
 }
 
-// Modern Product Card with loading and error handling
 class ProductCard extends StatelessWidget {
   final ProductModel product;
   final VoidCallback onCardTap;
   final VoidCallback onAddToCart;
 
-  const ProductCard({
-    super.key,
-    required this.product,
-    required this.onCardTap,
-    required this.onAddToCart,
-  });
+  const ProductCard({super.key, required this.product, required this.onCardTap, required this.onAddToCart});
 
   @override
   Widget build(BuildContext context) {
@@ -283,7 +258,6 @@ class ProductCard extends StatelessWidget {
                     height: 200,
                     width: 180,
                     fit: BoxFit.cover,
-                    // --- إضافة لتحسين عرض الصور ---
                     loadingBuilder: (context, child, progress) {
                       return progress == null ? child : Container(height: 200, width: 180, color: Colors.grey[200], child: const Center(child: CircularProgressIndicator()));
                     },
@@ -295,7 +269,6 @@ class ProductCard extends StatelessWidget {
                         child: const Center(child: Icon(Icons.image_not_supported_outlined, color: Colors.grey, size: 40)),
                       );
                     },
-                    // --- نهاية الإضافة ---
                   ),
                 ),
                 Positioned(
@@ -314,20 +287,12 @@ class ProductCard extends StatelessWidget {
             const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: Text(
-                product.name,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+              child: Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15), maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
             const SizedBox(height: 4),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: Text(
-                '${product.price.toStringAsFixed(2)} EGP',
-                style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 14, fontWeight: FontWeight.w600),
-              ),
+              child: Text('${product.price.toStringAsFixed(2)} EGP', style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 14, fontWeight: FontWeight.w600)),
             ),
           ],
         ),
