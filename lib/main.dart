@@ -3,8 +3,6 @@ import 'package:store/screens/splash_screen.dart';
 import 'theme.dart';
 // In lib/main.dart
 import 'package:flutter_localizations/flutter_localizations.dart'; // <-- أضف هذا السطر
-import 'screens/splash_screen.dart';
-import 'theme.dart';
 
 void main() {
   runApp(const MyApp());

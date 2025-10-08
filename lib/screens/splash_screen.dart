@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:store/main.dart'; // تأكد من أن هذا هو المسار الصحيح لصفحتك الرئيسية
+// تأكد من أن هذا هو المسار الصحيح لصفحتك الرئيسية
 import 'package:store/screens/home_page.dart';
 import 'package:store/theme.dart';
 

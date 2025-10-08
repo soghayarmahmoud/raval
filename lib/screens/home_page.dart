@@ -1,11 +1,9 @@
-// In lib/screens/home_page.dart
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:store/services/cart_service.dart';
 import 'package:store/screens/cart_page.dart';
 import 'product_detail_page.dart';
 import 'package:store/theme.dart';
-
-// ------------------- 1. Models -------------------
 class BannerModel {
   final String imageUrl;
   final String id;
@@ -23,10 +21,22 @@ class ProductModel {
   final String imageUrl;
   final double price;
   final String id;
+
   ProductModel({required this.name, required this.imageUrl, required this.price, required this.id});
+  
+  Map<String, dynamic> toJson() => {
+    'id': id, 'name': name, 'imageUrl': imageUrl, 'price': price,
+  };
+
+  factory ProductModel.fromJson(Map<String, dynamic> json) => ProductModel(
+    id: json['id'],
+    name: json['name'],
+    imageUrl: json['imageUrl'],
+    price: json['price'],
+  );
 }
 
-// ------------------- 2. Data Service (Using Online URLs) -------------------
+// ------------------- 2. Data Service -------------------
 class HomeDataService {
   List<BannerModel> getBanners() {
     return [
@@ -63,7 +73,7 @@ class HomeDataService {
   }
 }
 
-// ------------------- 3. Home Page UI (Using Image.network) -------------------
+// ------------------- 3. Home Page UI -------------------
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
   @override
@@ -71,8 +81,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // ... (initState, _addToCart, and other logic remains the same)
   final HomeDataService _dataService = HomeDataService();
+  final CartService _cartService = CartService();
   late List<CategoryModel> _categories;
   int _cartItemCount = 0;
 
@@ -80,38 +90,55 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _categories = _dataService.getCategories();
+    _loadCartCount();
   }
 
-  void _addToCart(ProductModel product) {
-    setState(() {
-      _cartItemCount++;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('تمت إضافة "${product.name}" إلى السلة'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+  void _loadCartCount() async {
+    final items = await _cartService.getCartItems();
+    if (mounted) {
+      setState(() {
+        _cartItemCount = items.length;
+      });
+    }
+  }
+
+  void _addToCart(ProductModel product) async {
+    await _cartService.addToCart(product);
+    _loadCartCount();
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('تمت إضافة "${product.name}" إلى السلة')),
+      );
+    }
+  }
+
+  void _navigateToProductDetail(ProductModel product) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ProductDetailPage(product: product)),
+    ).then((_) => _loadCartCount());
+  }
+  
+  void _navigateToCart() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const CartPage()),
+    ).then((_) => _loadCartCount());
   }
 
   @override
   Widget build(BuildContext context) {
-    // ... (DefaultTabController and Scaffold structure remains the same)
     return DefaultTabController(
       length: _categories.length,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text(
-            'RAVAL',
-            style: TextStyle(fontFamily: 'Exo2', fontWeight: FontWeight.bold, letterSpacing: 1.5),
-          ),
+          title: const Text('RAVAL', style: TextStyle(fontFamily: 'Exo2', fontWeight: FontWeight.bold, letterSpacing: 1.5)),
           centerTitle: true,
           actions: [
             _CartIconWithBadge(
               itemCount: _cartItemCount,
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const CartPage()));
-              },
+              onPressed: _navigateToCart,
             ),
           ],
           bottom: TabBar(
@@ -167,7 +194,6 @@ class _HomePageState extends State<HomePage> {
   }
   
   Widget _buildProductSection({required String title, required List<ProductModel> products}) {
-    // ... (This widget's structure remains the same)
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -185,9 +211,7 @@ class _HomePageState extends State<HomePage> {
               final product = products[index];
               return ProductCard(
                 product: product,
-                onCardTap: () {
-                   Navigator.push(context, MaterialPageRoute(builder: (context) => ProductDetailPage(product: product)));
-                },
+                onCardTap: () => _navigateToProductDetail(product),
                 onAddToCart: () => _addToCart(product),
               );
             },
@@ -198,10 +222,9 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// --- Widgets (Using Image.network) ---
+// --- Helper Widgets ---
 
 class _CartIconWithBadge extends StatelessWidget {
-  // ... (This widget remains the same)
   final int itemCount;
   final VoidCallback onPressed;
 
@@ -222,9 +245,16 @@ class _CartIconWithBadge extends StatelessWidget {
             right: 8,
             child: Container(
               padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(color: AppColors.primaryPink, borderRadius: BorderRadius.circular(10)),
+              decoration: BoxDecoration(
+                color: AppColors.primaryPink,
+                borderRadius: BorderRadius.circular(10),
+              ),
               constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-              child: Text('$itemCount', style: const TextStyle(color: Colors.white, fontSize: 10), textAlign: TextAlign.center),
+              child: Text(
+                '$itemCount',
+                style: const TextStyle(color: Colors.white, fontSize: 10),
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
       ],
@@ -237,7 +267,12 @@ class ProductCard extends StatelessWidget {
   final VoidCallback onCardTap;
   final VoidCallback onAddToCart;
 
-  const ProductCard({super.key, required this.product, required this.onCardTap, required this.onAddToCart});
+  const ProductCard({
+    super.key,
+    required this.product,
+    required this.onCardTap,
+    required this.onAddToCart,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -287,12 +322,20 @@ class ProductCard extends StatelessWidget {
             const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15), maxLines: 1, overflow: TextOverflow.ellipsis),
+              child: Text(
+                product.name,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             const SizedBox(height: 4),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: Text('${product.price.toStringAsFixed(2)} EGP', style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 14, fontWeight: FontWeight.w600)),
+              child: Text(
+                '${product.price.toStringAsFixed(2)} EGP',
+                style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 14, fontWeight: FontWeight.w600),
+              ),
             ),
           ],
         ),
