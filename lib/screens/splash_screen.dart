@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-// تأكد من أن هذا هو المسار الصحيح لصفحتك الرئيسية
+import 'main_screen.dart'; // <-- استيراد الشاشة الجديدة
 import 'package:store/screens/home_page.dart';
 import 'package:store/theme.dart';
 
@@ -64,11 +64,11 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
     _controller.forward();
 
     // تأخير الانتقال للصفحة الرئيسية
-    Timer(const Duration(milliseconds: 4200), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
-    });
+   Timer(const Duration(milliseconds: 4200), () {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => const MainScreen()), // <-- الانتقال إلى MainScreen
+    );
+  });
   }
 
   @override

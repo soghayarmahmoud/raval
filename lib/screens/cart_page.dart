@@ -37,19 +37,29 @@ class _CartPageState extends State<CartPage> {
   }
   
   // --- دالة جديدة للتحقق والانتقال للدفع ---
+ // In lib/screens/cart_page.dart
+
+  // --- دالة جديدة ومحسنة للتحقق والانتقال للدفع ---
   void _proceedToCheckout() async {
     final bool isLoggedIn = await _authService.isLoggedIn();
-    if (mounted) {
-      if (isLoggedIn) {
-        // إذا كان مسجل، اذهب لصفحة الدفع
+    if (!mounted) return; // للتأكد من أن الويدجت ما زالت موجودة
+
+    if (isLoggedIn) {
+      // إذا كان مسجل، اذهب لصفحة الدفع مباشرة
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const CheckoutPage()));
+    } else {
+      // إذا لم يكن مسجل، اذهب لصفحة إنشاء حساب
+      // وانتظر النتيجة عند العودة من الصفحة
+      final signupSuccess = await Navigator.push<bool>(
+        context,
+        MaterialPageRoute(builder: (context) => const SignUpPage()),
+      );
+
+      // إذا عاد المستخدم وكانت النتيجة "true" (أي أنه أنشأ حسابًا بنجاح)
+      // قم بالانتقال إلى صفحة الدفع
+      if (signupSuccess == true) {
+        if (!mounted) return;
         Navigator.push(context, MaterialPageRoute(builder: (context) => const CheckoutPage()));
-      } else {
-        // إذا لم يكن مسجل، اذهب لصفحة إنشاء حساب
-        final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => const SignUpPage()));
-        // إذا قام المستخدم بإنشاء حساب (result == true)، حاول مرة أخرى
-        if (result == true) {
-          _proceedToCheckout();
-        }
       }
     }
   }
@@ -120,13 +130,13 @@ class _CartPageState extends State<CartPage> {
             height: 55,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryPink.withOpacity(0.9),
+                backgroundColor: AppColors.primaryPink.withOpacity(0.25),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                   side: const BorderSide(color: AppColors.primaryPink, width: 2),
                 ),
                 elevation: 8,
-                shadowColor: AppColors.primaryPink.withOpacity(0.3),
+                shadowColor: AppColors.primaryPink.withOpacity(0.7),
               ),
               onPressed: _proceedToCheckout, // <-- استخدام الدالة الجديدة هنا
               child: const Text('الانتقال إلى الدفع', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
