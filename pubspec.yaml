@@ -1,0 +1,31 @@
+name: store
+description: "A new Flutter project."
+publish_to: 'none' 
+version: 0.1.0
+
+environment:
+  sdk: '>=3.4.3 <4.0.0' # من الأفضل تحديد نطاق أوسع للتوافق
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  animated_text_kit: ^4.2.2 # <--- تم تعديل المسافة البادئة هنا
+  carousel_slider: ^5.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0 # تم تعديل الإصدار ليكون متوافقًا بشكل عام
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/fonts/
+  
+  fonts:
+    - family: Exo2
+      fonts:
+        - asset: assets/fonts/Exo2-Bold.ttf
+          weight: 700
