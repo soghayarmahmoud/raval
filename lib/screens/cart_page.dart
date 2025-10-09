@@ -5,8 +5,6 @@ import 'package:store/services/auth_service.dart';
 import 'package:store/services/cart_service.dart';
 import 'package:store/screens/checkout_page.dart';
 import 'package:store/screens/signup_page.dart';
-import 'package:store/theme.dart';
-import 'home_page.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});

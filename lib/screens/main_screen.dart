@@ -44,8 +44,8 @@ class _MainScreenState extends State<MainScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _onItemTapped(2), // 2 هو index الخاص بـ HomePage
         backgroundColor: AppColors.primaryPink,
-        child: const Icon(Icons.home, color: Colors.white),
         elevation: 2.0,
+        child: const Icon(Icons.home, color: Colors.white),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
@@ -56,11 +56,11 @@ class _MainScreenState extends State<MainScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            IconButton(icon: Icon(Icons.search), onPressed: () => _onItemTapped(0)),
-            IconButton(icon: Icon(Icons.favorite_border), onPressed: () => _onItemTapped(1)),
+            IconButton(icon: const Icon(Icons.search), onPressed: () => _onItemTapped(0)),
+            IconButton(icon: const Icon(Icons.favorite_border), onPressed: () => _onItemTapped(1)),
             const SizedBox(width: 40), // مساحة فارغة مكان الزر العائم
-            IconButton(icon: Icon(Icons.shopping_cart_outlined), onPressed: () => _onItemTapped(3)),
-            IconButton(icon: Icon(Icons.person_outline), onPressed: () => _onItemTapped(4)),
+            IconButton(icon: const Icon(Icons.shopping_cart_outlined), onPressed: () => _onItemTapped(3)),
+            IconButton(icon: const Icon(Icons.person_outline), onPressed: () => _onItemTapped(4)),
           ],
         ),
       ),

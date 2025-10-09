@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'main_screen.dart'; // <-- استيراد الشاشة الجديدة
-import 'package:store/screens/home_page.dart';
 import 'package:store/theme.dart';
 
 class AnimatedSplashScreen extends StatefulWidget {

@@ -1,7 +1,6 @@
 // In lib/screens/login_page.dart
 import 'package:flutter/material.dart';
 import 'package:store/screens/signup_page.dart';
-import 'package:store/services/auth_service.dart';
 // ملاحظة: سنحتاج لتطوير AuthService لاحقًا ليدعم تسجيل الدخول الفعلي
 
 class LoginPage extends StatefulWidget {

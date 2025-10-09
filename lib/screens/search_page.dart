@@ -136,7 +136,7 @@ class _SearchPageState extends State<SearchPage> {
           children: [
             const Icon(Icons.search_off, size: 80, color: Colors.grey),
             const SizedBox(height: 16),
-            Text(
+            const Text(
               'لا توجد نتائج تطابق بحثك',
               style: TextStyle(fontSize: 20, color: Colors.grey),
             ),
