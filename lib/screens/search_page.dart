@@ -1,7 +1,7 @@
+// In lib/screens/search_page.dart
 import 'package:flutter/material.dart';
 import 'package:store/screens/home_page.dart';
 import 'package:store/screens/product_detail_page.dart';
-import 'package:store/theme.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -14,215 +14,223 @@ class _SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
   final HomeDataService _dataService = HomeDataService();
 
+  // قوائم المنتجات
   List<ProductModel> _allProducts = [];
-  List<ProductModel> _searchResults = [];
-  bool _hasSearched = false;
+  List<ProductModel> _filteredProducts = [];
+
+  // متغيرات الفلاتر
+  RangeValues _priceRange = const RangeValues(0, 1000);
+  List<String> _selectedColors = [];
+  List<String> _selectedSizes = [];
+  
+  // قوائم الخيارات المتاحة
+  final List<String> _availableColors = ['وردي', 'أبيض', 'أزرق', 'أسود', 'أخضر'];
+  final List<String> _availableSizes = ['S', 'M', 'L', 'XL'];
 
   @override
   void initState() {
     super.initState();
-    // نقوم بتحميل كل المنتجات مرة واحدة عند فتح الصفحة
     _loadAllProducts();
-
-    // نضيف مستمعًا لوحدة التحكم لنقوم بالبحث مع كل تغيير في النص
-    _searchController.addListener(_performSearch);
+    _searchController.addListener(_applyAllFilters);
   }
 
   @override
   void dispose() {
-    _searchController.removeListener(_performSearch);
+    _searchController.removeListener(_applyAllFilters);
     _searchController.dispose();
     super.dispose();
   }
 
   void _loadAllProducts() {
-    // نجمع المنتجات من كل الأقسام في قائمة واحدة
-    final List<ProductModel> products = [];
-    products.addAll(_dataService.getNewArrivals());
-    products.addAll(_dataService.getBestOffers());
-    
-    // يمكنك إضافة المزيد من المصادر هنا في المستقبل
-    
+    final products = [..._dataService.getNewArrivals(), ..._dataService.getBestOffers()];
     setState(() {
       _allProducts = products;
+      _filteredProducts = products; // في البداية، نعرض كل المنتجات
     });
   }
 
-  void _performSearch() {
-    final query = _searchController.text;
+  // --- الدالة المحورية التي تطبق البحث والفلاتر معًا ---
+  void _applyAllFilters() {
+    List<ProductModel> tempProducts = _allProducts;
+    final query = _searchController.text.toLowerCase();
 
-    // إذا كان مربع البحث فارغًا، نعيد القائمة للحالة الأولية
-    if (query.isEmpty) {
-      setState(() {
-        _searchResults = [];
-        _hasSearched = false;
-      });
-      return;
+    // 1. تطبيق البحث بالنص أولاً (إذا وجد)
+    if (query.isNotEmpty) {
+      tempProducts = tempProducts.where((product) {
+        final nameMatches = product.name.toLowerCase().contains(query);
+        final tagMatches = product.tags.any((tag) => tag.toLowerCase().contains(query));
+        return nameMatches || tagMatches;
+      }).toList();
     }
 
-    final lowerCaseQuery = query.toLowerCase();
-    
-    // نقوم بفلترة قائمة المنتجات الكاملة بناءً على نص البحث
-    final results = _allProducts.where((product) {
-      final nameMatches = product.name.toLowerCase().contains(lowerCaseQuery);
-      final descriptionMatches = product.description.toLowerCase().contains(lowerCaseQuery);
-      final tagMatches = product.tags.any((tag) => tag.toLowerCase().contains(lowerCaseQuery));
-
-      return nameMatches || descriptionMatches || tagMatches;
+    // 2. تطبيق فلتر السعر على نتائج البحث
+    tempProducts = tempProducts.where((p) {
+      return p.price >= _priceRange.start && p.price <= _priceRange.end;
     }).toList();
 
+    // 3. تطبيق فلتر اللون
+    if (_selectedColors.isNotEmpty) {
+      tempProducts = tempProducts.where((p) {
+        return p.colors.any((color) => _selectedColors.contains(color));
+      }).toList();
+    }
+
+    // 4. تطبيق فلتر المقاس
+    if (_selectedSizes.isNotEmpty) {
+      tempProducts = tempProducts.where((p) {
+        return p.sizes.any((size) => _selectedSizes.contains(size));
+      }).toList();
+    }
+
     setState(() {
-      _searchResults = results;
-      _hasSearched = true;
+      _filteredProducts = tempProducts;
     });
+  }
+
+  void _resetFilters() {
+      setState(() {
+        _priceRange = const RangeValues(0, 1000);
+        _selectedColors = [];
+        _selectedSizes = [];
+      });
+      _applyAllFilters(); // أعد تطبيق الفلاتر (مع البحث النصي إن وجد)
+      Navigator.of(context).pop();
+  }
+
+  void _showFilterSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setSheetState) {
+            return DraggableScrollableSheet(
+              expand: false,
+              initialChildSize: 0.6,
+              maxChildSize: 0.9,
+              builder: (_, scrollController) => Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('الفلاتر', style: Theme.of(context).textTheme.headlineSmall),
+                    const Divider(height: 24),
+                    Text('السعر (EGP)', style: Theme.of(context).textTheme.titleLarge),
+                    RangeSlider(
+                      values: _priceRange,
+                      min: 0,
+                      max: 1000,
+                      divisions: 20,
+                      labels: RangeLabels('${_priceRange.start.round()}', '${_priceRange.end.round()}'),
+                      onChanged: (values) => setSheetState(() => _priceRange = values),
+                    ),
+                    const SizedBox(height: 24),
+                    Text('اللون', style: Theme.of(context).textTheme.titleLarge),
+                    Wrap(
+                      spacing: 8.0,
+                      children: _availableColors.map((color) {
+                        final isSelected = _selectedColors.contains(color);
+                        return FilterChip(
+                          label: Text(color),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setSheetState(() {
+                              isSelected ? _selectedColors.remove(color) : _selectedColors.add(color);
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                     const SizedBox(height: 24),
+                    Text('المقاس', style: Theme.of(context).textTheme.titleLarge),
+                    Wrap(
+                      spacing: 8.0,
+                      children: _availableSizes.map((size) {
+                        final isSelected = _selectedSizes.contains(size);
+                        return FilterChip(
+                          label: Text(size),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setSheetState(() {
+                              isSelected ? _selectedSizes.remove(size) : _selectedSizes.add(size);
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        Expanded(child: OutlinedButton(onPressed: _resetFilters, child: const Text('إعادة تعيين'))),
+                        const SizedBox(width: 12),
+                        Expanded(child: ElevatedButton(onPressed: () {
+                          _applyAllFilters();
+                          Navigator.of(context).pop();
+                        }, child: const Text('تطبيق'))),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // شريط البحث المدمج في الـ AppBar
         title: TextField(
           controller: _searchController,
-          autofocus: true, // لفتح الكيبورد تلقائيًا
           decoration: InputDecoration(
-            hintText: 'ابحث عن فستان, بنطلون...',
+            hintText: 'ابحث عن منتجاتك المفضلة...',
             border: InputBorder.none,
             hintStyle: TextStyle(color: Colors.grey[600]),
           ),
-          style: TextStyle(
-            color: Theme.of(context).textTheme.bodyLarge?.color,
-            fontSize: 18,
-          ),
+          style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 18),
         ),
         actions: [
-          // زر لمسح النص في شريط البحث
-          if (_searchController.text.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.clear),
-              onPressed: () {
-                _searchController.clear();
-              },
-            ),
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: _showFilterSheet,
+          ),
         ],
       ),
-      body: _buildBody(),
-    );
-  }
-
-  Widget _buildBody() {
-    // الحالة الأولى: قبل أن يبدأ المستخدم بالبحث
-    if (!_hasSearched) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.search, size: 80, color: Colors.grey),
-            SizedBox(height: 16),
-            Text(
-              'ابحث عن منتجاتك المفضلة',
-              style: TextStyle(fontSize: 20, color: Colors.grey),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // الحالة الثانية: بعد البحث ولكن لا توجد نتائج
-    if (_searchResults.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.search_off, size: 80, color: Colors.grey),
-            const SizedBox(height: 16),
-            const Text(
-              'لا توجد نتائج تطابق بحثك',
-              style: TextStyle(fontSize: 20, color: Colors.grey),
-            ),
-            Text(
-              '"${_searchController.text}"',
-              style: TextStyle(fontSize: 18, color: Colors.grey[600], fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-      );
-    }
-    
-    // الحالة الثالثة: تم العثور على نتائج، نعرضها في قائمة
-    return ListView.builder(
-      padding: const EdgeInsets.all(12.0),
-      itemCount: _searchResults.length,
-      itemBuilder: (context, index) {
-        final product = _searchResults[index];
-        return _SearchResultCard(product: product);
-      },
-    );
-  }
-}
-
-
-/// ويدجت مخصصة لعرض كارت المنتج في صفحة البحث
-class _SearchResultCard extends StatelessWidget {
-  final ProductModel product;
-
-  const _SearchResultCard({required this.product});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: () {
-          // عند الضغط، يتم الانتقال لصفحة تفاصيل المنتج
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ProductDetailPage(product: product),
-            ),
-          );
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: Image.network(
-                  product.imageUrl,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                ),
+      body: _filteredProducts.isEmpty
+          ? const Center(child: Text('لا توجد منتجات تطابق بحثك أو الفلاتر المختارة'))
+          : GridView.builder(
+              padding: const EdgeInsets.all(12.0),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 0.65,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      product.name,
-                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '${product.price.toStringAsFixed(2)} EGP',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
-            ],
-          ),
-        ),
-      ),
+              itemCount: _filteredProducts.length,
+              itemBuilder: (context, index) {
+                // ملاحظة: قد تحتاج لتعديل بسيط على ProductCard لتعمل هنا
+                // بشكل خاص، تأكد من أن دوال onCardTap و onAddToCart تعمل بشكل صحيح
+                final product = _filteredProducts[index];
+                return ProductCard(
+                  product: product,
+                  onCardTap: () {
+                     Navigator.push(context, MaterialPageRoute(builder: (context) => ProductDetailPage(product: product)));
+                  },
+                  onAddToCart: () {
+                     // يمكنك إضافة منطق إضافة للسلة هنا إذا أردت
+                     ScaffoldMessenger.of(context).showSnackBar(
+                       SnackBar(content: Text('تمت إضافة "${product.name}" إلى السلة'))
+                     );
+                  },
+                );
+              },
+            ),
     );
   }
 }

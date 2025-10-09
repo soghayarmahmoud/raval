@@ -4,14 +4,21 @@ import 'package:provider/provider.dart';
 import 'package:store/providers/theme_provider.dart';
 import 'package:store/theme.dart';
 
-// موديل بسيط لتنظيم بيانات الصناديق (لتسهيل الربط مع الداشبورد مستقبلاً)
+// موديلات لتنظيم البيانات (لتسهيل الربط مع الداشبورد مستقبلاً)
 class ServiceBoxModel {
   final String title;
   final IconData icon;
   final Color color;
-
   ServiceBoxModel({required this.title, required this.icon, required this.color});
 }
+
+class AddressModel {
+  final String id;
+  final String name; // e.g., "المنزل", "العمل"
+  final String details;
+  AddressModel({required this.id, required this.name, required this.details});
+}
+
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -22,21 +29,31 @@ class ProfilePage extends StatelessWidget {
     final List<ServiceBoxModel> services = [
       ServiceBoxModel(title: 'طلباتي', icon: Icons.shopping_bag_outlined, color: AppColors.primaryPink),
       ServiceBoxModel(title: 'تتبع الشحنة', icon: Icons.local_shipping_outlined, color: AppColors.accentTeal),
-      ServiceBoxModel(title: 'العناوين', icon: Icons.location_on_outlined, color: AppColors.accentPurple),
       ServiceBoxModel(title: 'المفضلة', icon: Icons.favorite_border, color: AppColors.accentYellow),
+      ServiceBoxModel(title: 'المحفظة', icon: Icons.account_balance_wallet_outlined, color: AppColors.accentPurple),
+    ];
+    
+    // قائمة عناوين مؤقتة (سيتم جلبها من Firestore)
+    final List<AddressModel> userAddresses = [
+       AddressModel(id: '1', name: 'المنزل', details: 'حولي، قطعة 5، شارع 10، منزل 15'),
+       AddressModel(id: '2', name: 'العمل', details: 'مدينة الكويت، برج التجارية، الدور 20'),
     ];
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('القائمة'),
+        title: const Text('الحساب الشخصي'), // <-- تم تعديل العنوان
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- قسم الخدمات ---
+              // --- قسم معلومات المستخدم ---
+              _buildUserInfo(context),
+              const SizedBox(height: 16),
+
+              // --- قسم الخدمات السريعة ---
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -44,7 +61,7 @@ class ProfilePage extends StatelessWidget {
                   crossAxisCount: 2,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 1.2,
+                  childAspectRatio: 1.25,
                 ),
                 itemCount: services.length,
                 itemBuilder: (context, index) {
@@ -59,28 +76,15 @@ class ProfilePage extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
+              // --- قسم العناوين ---
+              _buildSectionTitle('العناوين المحفوظة'),
+              _buildAddressesSection(context, userAddresses),
+              const SizedBox(height: 24),
+
               // --- قسم الإعدادات ---
               _buildSectionTitle('الإعدادات'),
               _buildSettingsMenu(context),
               const SizedBox(height: 24),
-              
-              // --- قسم أقرب متجر ---
-              _buildSectionTitle('أقرب متجر'),
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                child: ListTile(
-                  leading: Icon(Icons.store_mall_directory_outlined, color: Theme.of(context).primaryColor),
-                  title: const Text('اسم المتجر هنا - يفتح حتى 10م'), // سيتم جلبه من الداشبورد
-                  subtitle: const Text('العنوان التفصيلي للمتجر...'),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
-                    // TODO: فتح الخريطة لموقع المتجر
-                  },
-                ),
-              ),
-              const SizedBox(height: 24),
-
 
               // --- قسم الدعم ---
               _buildSectionTitle('الدعم والمساعدة'),
@@ -89,6 +93,7 @@ class ProfilePage extends StatelessWidget {
 
               // --- قسم روابط السوشيال ميديا ---
               _buildSocialMediaLinks(),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -96,7 +101,42 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  // ويدجت لبناء الصناديق المضيئة
+  // ويدجت لعرض معلومات المستخدم (جاهزة للربط بـ Firebase)
+  Widget _buildUserInfo(BuildContext context) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            const CircleAvatar(
+              radius: 30,
+              child: Icon(Icons.person, size: 30),
+            ),
+            const SizedBox(width: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // TODO: اجلب الاسم الحقيقي من Firebase
+                const Text(
+                  "مرحباً، اسم العميل", 
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                // TODO: اجلب الايميل الحقيقي
+                Text(
+                  "client.email@example.com",
+                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ويدجت لبناء الصناديق المضيئة (تم تعديل الخلفية)
   Widget _buildServiceBox({
     required String title,
     required IconData icon,
@@ -107,47 +147,82 @@ class ProfilePage extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1), // خلفية بلون خفيف
+          color: color.withOpacity(0.15), // <-- تم جعل الخلفية أفتح قليلاً
           borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: color, width: 2), // بوردر بنفس اللون
+          border: Border.all(color: color, width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.4), // ظل مضيء بنفس اللون
-              blurRadius: 10,
-              spreadRadius: 1,
+              color: color.withOpacity(0.3),
+              blurRadius: 8,
+              spreadRadius: 0.5,
             ),
           ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 40, color: color), // أيقونة بنفس اللون
+            Icon(icon, size: 40, color: color),
             const SizedBox(height: 12),
             Text(
               title,
-              style: TextStyle(
-                color: color, // نص بنفس اللون
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(color: color, fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ],
         ),
       ),
     );
   }
+
+  // قسم العناوين (جاهز للربط بالداشبورد)
+  Widget _buildAddressesSection(BuildContext context, List<AddressModel> addresses) {
+    return Column(
+      children: [
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: addresses.length,
+          itemBuilder: (context, index) {
+            final address = addresses[index];
+            return Card(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: ListTile(
+                leading: const Icon(Icons.home_work_outlined),
+                title: Text(address.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text(address.details),
+                trailing: PopupMenuButton<String>(
+                  onSelected: (value) { /* TODO: Handle edit/delete */ },
+                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                    const PopupMenuItem<String>(value: 'edit', child: Text('تعديل')),
+                    const PopupMenuItem<String>(value: 'delete', child: Text('حذف')),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          icon: const Icon(Icons.add),
+          label: const Text('إضافة عنوان جديد'),
+          onPressed: () { /* TODO: Open add address page */ },
+          style: OutlinedButton.styleFrom(minimumSize: const Size(double.infinity, 40)),
+        )
+      ],
+    );
+  }
   
+  // (باقي الويدجتس: _buildSectionTitle, _buildSettingsMenu, etc. تبقى كما هي)
+
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
+      padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
       child: Text(
         title,
-        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey),
       ),
     );
   }
   
-  // ويدجت لقائمة الإعدادات
   Widget _buildSettingsMenu(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     return Card(
@@ -158,49 +233,50 @@ class ProfilePage extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.language),
             title: const Text('اللغة'),
-            trailing: const Text('العربية'), // يمكن تعديلها لاحقًا
+            trailing: const Text('العربية'),
             onTap: () {},
           ),
           ListTile(
             leading: const Icon(Icons.brightness_6_outlined),
             title: const Text('الثيم'),
             onTap: () {
-              // إظهار نافذة اختيار الثيم
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
                   title: const Text('اختر الثيم'),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      RadioListTile<ThemeMode>(
-                        title: const Text('فاتح'),
-                        value: ThemeMode.light,
-                        groupValue: themeProvider.themeMode,
-                        onChanged: (value) {
-                          if(value != null) themeProvider.setThemeMode(value);
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      RadioListTile<ThemeMode>(
-                        title: const Text('داكن'),
-                        value: ThemeMode.dark,
-                        groupValue: themeProvider.themeMode,
-                        onChanged: (value) {
-                          if(value != null) themeProvider.setThemeMode(value);
-                           Navigator.of(context).pop();
-                        },
-                      ),
-                       RadioListTile<ThemeMode>(
-                        title: const Text('افتراضي للنظام'),
-                        value: ThemeMode.system,
-                        groupValue: themeProvider.themeMode,
-                        onChanged: (value) {
-                           if(value != null) themeProvider.setThemeMode(value);
-                           Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
+                  content: Consumer<ThemeProvider>( // استخدام Consumer لإعادة بناء المحتوى فقط
+                    builder: (context, provider, child) => Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        RadioListTile<ThemeMode>(
+                          title: const Text('فاتح'),
+                          value: ThemeMode.light,
+                          groupValue: provider.themeMode,
+                          onChanged: (value) {
+                            if (value != null) provider.setThemeMode(value);
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        RadioListTile<ThemeMode>(
+                          title: const Text('داكن'),
+                          value: ThemeMode.dark,
+                          groupValue: provider.themeMode,
+                          onChanged: (value) {
+                            if (value != null) provider.setThemeMode(value);
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        RadioListTile<ThemeMode>(
+                          title: const Text('افتراضي للنظام'),
+                          value: ThemeMode.system,
+                          groupValue: provider.themeMode,
+                          onChanged: (value) {
+                            if (value != null) provider.setThemeMode(value);
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -211,7 +287,6 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  // ويدجت لقائمة الدعم
   Widget _buildSupportMenu(BuildContext context) {
     return Card(
       elevation: 2,
@@ -233,14 +308,13 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  // ويدجت لروابط السوشيال ميديا
   Widget _buildSocialMediaLinks() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        IconButton(onPressed: (){}, icon: const Icon(Icons.facebook, size: 30)),
-        IconButton(onPressed: (){}, icon: const Icon(Icons.camera_alt, size: 30)), // Placeholder for Instagram
-        IconButton(onPressed: (){}, icon: const Icon(Icons.chat_bubble_outline, size: 30)), // Placeholder for a chat app
+        IconButton(onPressed: () {}, icon: const Icon(Icons.facebook, size: 30)),
+        IconButton(onPressed: () {}, icon: const Icon(Icons.camera_alt, size: 30)),
+        IconButton(onPressed: () {}, icon: const Icon(Icons.chat_bubble_outline, size: 30)),
       ],
     );
   }
