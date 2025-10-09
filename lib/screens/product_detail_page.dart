@@ -1,5 +1,7 @@
 // In lib/screens/product_detail_page.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // <-- سطر جديد
+import 'package:store/providers/favorites_provider.dart'; // <-- سطر جديد
 import 'package:store/services/cart_service.dart';
 import 'home_page.dart'; // We need ProductModel from here
 
@@ -11,9 +13,27 @@ class ProductDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // --- تم إضافة هذا الجزء ---
+    final favoritesProvider = Provider.of<FavoritesProvider>(context);
+    final isFav = favoritesProvider.isFavorite(product);
+    // ----------------------
+
     return Scaffold(
       appBar: AppBar(
         title: Text(product.name),
+        // --- تم إضافة هذا الجزء ---
+        actions: [
+          IconButton(
+            icon: Icon(
+              isFav ? Icons.favorite : Icons.favorite_border,
+              color: isFav ? Colors.red : null,
+            ),
+            onPressed: () {
+              favoritesProvider.toggleFavorite(product);
+            },
+          ),
+        ],
+        // ----------------------
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -34,9 +54,10 @@ class ProductDetailPage extends StatelessWidget {
                     style: TextStyle(fontSize: 22, color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
-                    'وصف المنتج هنا. هذا النص هو مثال لوصف المنتج ويمكن استبداله بالوصف الحقيقي للمنتج لاحقًا.',
-                    style: TextStyle(fontSize: 16, height: 1.5),
+                  // هنا يمكنك استخدام product.description بدلاً من النص الثابت
+                  Text(
+                    product.description, // <-- استخدام الوصف من الموديل
+                    style: const TextStyle(fontSize: 16, height: 1.5),
                   ),
                   const SizedBox(height: 30),
                   SizedBox(

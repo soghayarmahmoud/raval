@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // <-- السطر الجديد
+import 'package:store/providers/favorites_provider.dart'; // <-- السطر الجديد
 import 'package:store/screens/splash_screen.dart';
 import 'theme.dart';
 // In lib/main.dart
 import 'package:flutter_localizations/flutter_localizations.dart'; // <-- أضف هذا السطر
 
 void main() {
-  runApp(const MyApp());
+  // --- تم التعديل هنا ---
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => FavoritesProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

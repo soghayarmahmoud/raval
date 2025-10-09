@@ -12,11 +12,9 @@ class AppColors {
   static const Color textDark = Color(0xFF4E4D4D);
   static const Color textLight = Color(0xFFF5F5F5);
 
-  // ألوان مريحة للعين للخلفيات
   static const Color backgroundLight = Color(0xFFFAF9F6); // أبيض مائل للصفرة
   static const Color backgroundDark = Color(0xFF1C1C1E); // أسود غير كامل
 
-  // ألوان للأسطح (مثل الكروت والحاويات)
   static const Color surfaceLight = Colors.white;
   static const Color surfaceDark = Color(0xFF2C2C2E);
 }

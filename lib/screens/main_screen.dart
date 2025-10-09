@@ -41,7 +41,6 @@ class _MainScreenState extends State<MainScreen> {
         children: _pages,
       ),
 
-      // زر الـ Home المميز في المنتصف
       floatingActionButton: FloatingActionButton(
         onPressed: () => _onItemTapped(2), // 2 هو index الخاص بـ HomePage
         backgroundColor: AppColors.primaryPink,
