@@ -343,6 +343,8 @@
 //     );
 //   }
 // }
+
+
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:store/services/cart_service.dart';
@@ -416,9 +418,9 @@ class ProductModel {
 class HomeDataService {
   List<BannerModel> getBanners() {
     return [
-      BannerModel(id: 'b1', imageUrl: 'https://cdn.pixabay.com/photo/2022/07/04/18/43/woman-7301933_640.jpg'),
-      BannerModel(id: 'b2', imageUrl: 'https://cdn.pixabay.com/photo/2022/09/16/16/34/woman-7459122_640.jpg'),
-      BannerModel(id: 'b3', imageUrl: 'https://cdn.pixabay.com/photo/2022/08/11/21/25/street-7380949_640.jpg'),
+      BannerModel(id: 'b1', imageUrl: 'https://www.pexels.com/photo/assorted-clothes-996329/'),
+      BannerModel(id: 'b2', imageUrl: 'https://www.pexels.com/photo/low-angle-view-of-shoes-322207/'),
+      BannerModel(id: 'b3', imageUrl: 'https://www.pexels.com/photo/close-up-of-row-325876/'),
     ];
   }
 
@@ -440,10 +442,10 @@ class HomeDataService {
         name: 'فستان بناتي ربيعي',
         price: 450.00,
         salePrice: 399.00,
-        imageUrl: 'https://cdn.pixabay.com/photo/2017/01/21/18/35/fashion-1998394_640.jpg',
+        imageUrl: 'https://www.pexels.com/photo/pair-of-brown-leather-casual-shoes-on-table-298863/',
         otherImages: [
-          'https://images.pexels.com/photos/3602167/pexels-photo-3602167.jpeg?auto=compress&cs=tinysrgb&w=600',
-          'https://images.pexels.com/photos/3602165/pexels-photo-3602165.jpeg?auto=compress&cs=tinysrgb&w=600',
+          'https://www.pexels.com/photo/stacked-blue-jeans-52518/',
+          'https://www.pexels.com/photo/photo-of-iphone-on-shirt-near-sunglasses-934063/',
         ],
         description: 'فستان بناتي رائع مصنوع من أجود أنواع القطن، مناسب لفصل الربيع والخريف. تصميم أنيق بألوان زاهية.',
         tags: ['بناتي', 'فساتين', 'ربيعي'],
@@ -455,9 +457,9 @@ class HomeDataService {
 
   List<ProductModel> getBestOffers() {
      return [
-      ProductModel(id: 'p4', name: 'جاكيت شتوي', price: 600.00, imageUrl: 'https://cdn.pixabay.com/photo/2014/08/26/21/48/shirts-428627_640.jpg', description: 'وصف المنتج هنا', tags: ['شتوي']),
-      ProductModel(id: 'p5', name: 'تنورة قصيرة', price: 320.00, imageUrl: 'https://cdn.pixabay.com/photo/2015/06/25/16/57/dresses-821216_640.jpg', description: 'وصف المنتج هنا', tags: ['بناتي', 'صيفي']),
-      ProductModel(id: 'p6', name: 'بنطلون جينز', price: 410.00, imageUrl: 'https://cdn.pixabay.com/photo/2017/08/01/11/42/skinny-jeans-2565092_640.jpg', description: 'وصف المنتج هنا', tags: ['جينز']),
+      ProductModel(id: 'p4', name: 'جاكيت شتوي', price: 600.00, imageUrl: 'https://www.pexels.com/photo/two-hanged-blue-stonewash-and-blue-jeans-1082528/', description: 'وصف المنتج هنا', tags: ['شتوي']),
+      ProductModel(id: 'p5', name: 'تنورة قصيرة', price: 320.00, imageUrl: 'https://www.pexels.com/photo/different-apparel-on-stand-in-clothing-shop-5709661/', description: 'وصف المنتج هنا', tags: ['بناتي', 'صيفي']),
+      ProductModel(id: 'p6', name: 'بنطلون جينز', price: 410.00, imageUrl: 'https://www.pexels.com/photo/close-up-of-clothes-hanging-on-fabric-250288/', description: 'وصف المنتج هنا', tags: ['جينز']),
     ];
   }
 }
@@ -491,8 +493,8 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _addToCart(ProductModel product) async {
-    await _cartService.addToCart(product);
+  void _addToCart(ProductModel product, int quantity) async {
+    await _cartService.addToCart(product, quantity);
     _loadCartCount();
     
     if (mounted) {
@@ -601,8 +603,9 @@ class _HomePageState extends State<HomePage> {
               return ProductCard(
                 product: product,
                 onCardTap: () => _navigateToProductDetail(product),
-                onAddToCart: () => _addToCart(product),
+                onAddToCart: () => _addToCart(product, 1), // <-- تم التعديل هنا
               );
+
             },
           ),
         ),
