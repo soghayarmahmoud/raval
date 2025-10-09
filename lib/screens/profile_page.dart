@@ -1,7 +1,10 @@
 // In lib/screens/profile_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:store/providers/locale_provider.dart';
 import 'package:store/providers/theme_provider.dart';
+import 'package:store/screens/add_address_page.dart';
+import 'package:store/services/notification_service.dart';
 import 'package:store/theme.dart';
 
 // موديلات لتنظيم البيانات (لتسهيل الربط مع الداشبورد مستقبلاً)
@@ -19,7 +22,6 @@ class AddressModel {
   AddressModel({required this.id, required this.name, required this.details});
 }
 
-
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
@@ -30,7 +32,7 @@ class ProfilePage extends StatelessWidget {
       ServiceBoxModel(title: 'طلباتي', icon: Icons.shopping_bag_outlined, color: AppColors.primaryPink),
       ServiceBoxModel(title: 'تتبع الشحنة', icon: Icons.local_shipping_outlined, color: AppColors.accentTeal),
       ServiceBoxModel(title: 'المفضلة', icon: Icons.favorite_border, color: AppColors.accentYellow),
-      ServiceBoxModel(title: 'المحفظة', icon: Icons.account_balance_wallet_outlined, color: AppColors.accentPurple),
+      ServiceBoxModel(title: 'عناوين الفروع', icon: Icons.store_mall_directory_outlined, color: AppColors.accentPurple),
     ];
     
     // قائمة عناوين مؤقتة (سيتم جلبها من Firestore)
@@ -41,7 +43,7 @@ class ProfilePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('الحساب الشخصي'), // <-- تم تعديل العنوان
+        title: const Text('الحساب الشخصي'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -70,7 +72,9 @@ class ProfilePage extends StatelessWidget {
                     title: service.title,
                     icon: service.icon,
                     color: service.color,
-                    onTap: () {},
+                    onTap: () {
+                      // TODO: Add navigation logic for each service
+                    },
                   );
                 },
               ),
@@ -101,7 +105,6 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  // ويدجت لعرض معلومات المستخدم (جاهزة للربط بـ Firebase)
   Widget _buildUserInfo(BuildContext context) {
     return Card(
       elevation: 2,
@@ -118,14 +121,12 @@ class ProfilePage extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // TODO: اجلب الاسم الحقيقي من Firebase
                 const Text(
-                  "مرحباً، اسم العميل", 
+                  "مرحباً، اسم العميل", // TODO: Fetch real name from Firebase
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                // TODO: اجلب الايميل الحقيقي
                 Text(
-                  "client.email@example.com",
+                  "client.email@example.com", // TODO: Fetch real email
                   style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
                 ),
               ],
@@ -136,7 +137,6 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  // ويدجت لبناء الصناديق المضيئة (تم تعديل الخلفية)
   Widget _buildServiceBox({
     required String title,
     required IconData icon,
@@ -147,7 +147,7 @@ class ProfilePage extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15), // <-- تم جعل الخلفية أفتح قليلاً
+          color: color.withOpacity(0.15),
           borderRadius: BorderRadius.circular(15),
           border: Border.all(color: color, width: 1.5),
           boxShadow: [
@@ -173,46 +173,48 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  // قسم العناوين (جاهز للربط بالداشبورد)
   Widget _buildAddressesSection(BuildContext context, List<AddressModel> addresses) {
     return Column(
       children: [
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: addresses.length,
-          itemBuilder: (context, index) {
-            final address = addresses[index];
-            return Card(
-              margin: const EdgeInsets.only(bottom: 8),
-              child: ListTile(
-                leading: const Icon(Icons.home_work_outlined),
-                title: Text(address.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text(address.details),
-                trailing: PopupMenuButton<String>(
-                  onSelected: (value) { /* TODO: Handle edit/delete */ },
-                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                    const PopupMenuItem<String>(value: 'edit', child: Text('تعديل')),
-                    const PopupMenuItem<String>(value: 'delete', child: Text('حذف')),
-                  ],
+        if (addresses.isEmpty)
+          const Text("لا توجد عناوين محفوظة.")
+        else
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: addresses.length,
+            itemBuilder: (context, index) {
+              final address = addresses[index];
+              return Card(
+                margin: const EdgeInsets.only(bottom: 8),
+                child: ListTile(
+                  leading: const Icon(Icons.home_work_outlined),
+                  title: Text(address.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text(address.details),
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (value) { /* TODO: Handle edit/delete logic */ },
+                    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                      const PopupMenuItem<String>(value: 'edit', child: Text('تعديل')),
+                      const PopupMenuItem<String>(value: 'delete', child: Text('حذف')),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
+              );
+            },
+          ),
         const SizedBox(height: 8),
         OutlinedButton.icon(
           icon: const Icon(Icons.add),
           label: const Text('إضافة عنوان جديد'),
-          onPressed: () { /* TODO: Open add address page */ },
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (c) => const AddAddressPage()));
+          },
           style: OutlinedButton.styleFrom(minimumSize: const Size(double.infinity, 40)),
         )
       ],
     );
   }
   
-  // (باقي الويدجتس: _buildSectionTitle, _buildSettingsMenu, etc. تبقى كما هي)
-
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
@@ -225,6 +227,8 @@ class ProfilePage extends StatelessWidget {
   
   Widget _buildSettingsMenu(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final localeProvider = Provider.of<LocaleProvider>(context, listen: false);
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -233,8 +237,31 @@ class ProfilePage extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.language),
             title: const Text('اللغة'),
-            trailing: const Text('العربية'),
-            onTap: () {},
+            trailing: Text(localeProvider.locale.languageCode == 'ar' ? 'العربية' : 'English'),
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (context) => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      title: const Text('العربية'),
+                      onTap: () {
+                        localeProvider.setLocale(const Locale('ar'));
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    ListTile(
+                      title: const Text('English'),
+                      onTap: () {
+                        localeProvider.setLocale(const Locale('en'));
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
           ListTile(
             leading: const Icon(Icons.brightness_6_outlined),
@@ -244,7 +271,7 @@ class ProfilePage extends StatelessWidget {
                 context: context,
                 builder: (context) => AlertDialog(
                   title: const Text('اختر الثيم'),
-                  content: Consumer<ThemeProvider>( // استخدام Consumer لإعادة بناء المحتوى فقط
+                  content: Consumer<ThemeProvider>(
                     builder: (context, provider, child) => Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -280,8 +307,16 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ),
               );
+          ListTile(
+            leading: const Icon(Icons.notifications_outlined),
+            title: const Text('Send Test Notification'),
+            onTap: () {
+              NotificationService().sendTestNotification();
+            },
+          );
             },
           ),
+          
         ],
       ),
     );

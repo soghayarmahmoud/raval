@@ -82,15 +82,15 @@ class HomeDataService {
       BannerModel(
           id: 'b1',
           imageUrl:
-              'https://cdn.pixabay.com/photo/22/07/04/18/43/woman-7301933_640.jpg'),
+              'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.houseofindya.com%2Fkids%2Fgirls-clothing%2Fcat&psig=AOvVaw06qMWDUv5wS6HVG3URP9Wk&ust=1760097979706000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCLC2soiKl5ADFQAAAAAdAAAAABAE'),
       BannerModel(
           id: 'b2',
           imageUrl:
-              'https://cdn.pixabay.com/photo/22/09/16/16/34/woman-7459122_640.jpg'),
+              'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pinterest.com%2Fpin%2F20688479528342559%2F&psig=AOvVaw06qMWDUv5wS6HVG3URP9Wk&ust=1760097979706000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCLC2soiKl5ADFQAAAAAdAAAAABAK'),
       BannerModel(
           id: 'b3',
           imageUrl:
-              'https://cdn.pixabay.com/photo/22/08/11/21/25/street-7380949_640.jpg'),
+              'https://africanclothingstore.co.uk/wp-content/uploads/2020/12/DSC_0353.jpg'),
     ];
   }
 
@@ -112,10 +112,10 @@ class HomeDataService {
         price: 450.00,
         salePrice: 399.00,
         imageUrl:
-            'https://cdn.pixabay.com/photo/2017/01/21/18/35/fashion-1998394_640.jpg',
+            'https://africanclothingstore.co.uk/wp-content/uploads/2020/12/DSC_0353.jpg',
         otherImages: [
-          'https://images.pexels.com/photos/3602167/pexels-photo-3602167.jpeg?auto=compress&cs=tinysrgb&w=600',
-          'https://images.pexels.com/photos/3602165/pexels-photo-3602165.jpeg?auto=compress&cs=tinysrgb&w=600',
+          'https://www.foreverkidz.in/cdn/shop/files/WhatsAppImage2025-08-29at2.58.50PM.jpg?v=1756462531&width=3000',
+          'https://img.faballey.com/images/Product/AIC00007L/4.jpg',
         ],
         description:
             'فستان بناتي رائع مصنوع من أجود أنواع القطن، مناسب لفصل الربيع والخريف. تصميم أنيق بألوان زاهية.',
@@ -128,7 +128,7 @@ class HomeDataService {
           name: 'طقم ولادي صيفي',
           price: 380.50,
           imageUrl:
-              'https://cdn.pixabay.com/photo/2015/11/26/00/14/woman-1062084_640.jpg',
+              'https://images.pexels.com/photos/4263705/pexels-photo-4263705.jpeg',
           description: 'وصف المنتج هنا',
           tags: ['ولادي'],
           sizes: ['M', 'L', 'XL'],
@@ -143,7 +143,7 @@ class HomeDataService {
         name: 'جاكيت شتوي',
         price: 600.00,
         imageUrl:
-            'https://cdn.pixabay.com/photo/2014/08/26/21/48/shirts-428627_640.jpg',
+            'https://images.pexels.com/photos/34222783/pexels-photo-34222783.jpeg',
         description: 'وصف المنتج هنا',
         tags: ['شتوي', 'ولادي'],
         sizes: ['S', 'M'],

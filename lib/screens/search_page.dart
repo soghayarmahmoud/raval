@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:store/screens/home_page.dart';
 import 'package:store/screens/product_detail_page.dart';
+import 'package:store/services/cart_service.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -14,16 +15,13 @@ class _SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
   final HomeDataService _dataService = HomeDataService();
 
-  // قوائم المنتجات
   List<ProductModel> _allProducts = [];
   List<ProductModel> _filteredProducts = [];
 
-  // متغيرات الفلاتر
   RangeValues _priceRange = const RangeValues(0, 1000);
   List<String> _selectedColors = [];
   List<String> _selectedSizes = [];
   
-  // قوائم الخيارات المتاحة
   final List<String> _availableColors = ['وردي', 'أبيض', 'أزرق', 'أسود', 'أخضر'];
   final List<String> _availableSizes = ['S', 'M', 'L', 'XL'];
 
@@ -45,16 +43,14 @@ class _SearchPageState extends State<SearchPage> {
     final products = [..._dataService.getNewArrivals(), ..._dataService.getBestOffers()];
     setState(() {
       _allProducts = products;
-      _filteredProducts = products; // في البداية، نعرض كل المنتجات
+      _filteredProducts = products;
     });
   }
 
-  // --- الدالة المحورية التي تطبق البحث والفلاتر معًا ---
   void _applyAllFilters() {
     List<ProductModel> tempProducts = _allProducts;
     final query = _searchController.text.toLowerCase();
 
-    // 1. تطبيق البحث بالنص أولاً (إذا وجد)
     if (query.isNotEmpty) {
       tempProducts = tempProducts.where((product) {
         final nameMatches = product.name.toLowerCase().contains(query);
@@ -63,19 +59,16 @@ class _SearchPageState extends State<SearchPage> {
       }).toList();
     }
 
-    // 2. تطبيق فلتر السعر على نتائج البحث
     tempProducts = tempProducts.where((p) {
       return p.price >= _priceRange.start && p.price <= _priceRange.end;
     }).toList();
 
-    // 3. تطبيق فلتر اللون
     if (_selectedColors.isNotEmpty) {
       tempProducts = tempProducts.where((p) {
         return p.colors.any((color) => _selectedColors.contains(color));
       }).toList();
     }
 
-    // 4. تطبيق فلتر المقاس
     if (_selectedSizes.isNotEmpty) {
       tempProducts = tempProducts.where((p) {
         return p.sizes.any((size) => _selectedSizes.contains(size));
@@ -93,10 +86,11 @@ class _SearchPageState extends State<SearchPage> {
         _selectedColors = [];
         _selectedSizes = [];
       });
-      _applyAllFilters(); // أعد تطبيق الفلاتر (مع البحث النصي إن وجد)
+      _applyAllFilters();
       Navigator.of(context).pop();
   }
 
+  // --- تم التعديل على هذه الدالة لجعلها متجاوبة ---
   void _showFilterSheet() {
     showModalBottomSheet(
       context: context,
@@ -109,72 +103,84 @@ class _SearchPageState extends State<SearchPage> {
           builder: (BuildContext context, StateSetter setSheetState) {
             return DraggableScrollableSheet(
               expand: false,
-              initialChildSize: 0.6,
+              initialChildSize: 0.7, // زدنا الحجم المبدئي قليلاً
               maxChildSize: 0.9,
-              builder: (_, scrollController) => Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('الفلاتر', style: Theme.of(context).textTheme.headlineSmall),
-                    const Divider(height: 24),
-                    Text('السعر (EGP)', style: Theme.of(context).textTheme.titleLarge),
-                    RangeSlider(
-                      values: _priceRange,
-                      min: 0,
-                      max: 1000,
-                      divisions: 20,
-                      labels: RangeLabels('${_priceRange.start.round()}', '${_priceRange.end.round()}'),
-                      onChanged: (values) => setSheetState(() => _priceRange = values),
-                    ),
-                    const SizedBox(height: 24),
-                    Text('اللون', style: Theme.of(context).textTheme.titleLarge),
-                    Wrap(
-                      spacing: 8.0,
-                      children: _availableColors.map((color) {
-                        final isSelected = _selectedColors.contains(color);
-                        return FilterChip(
-                          label: Text(color),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            setSheetState(() {
-                              isSelected ? _selectedColors.remove(color) : _selectedColors.add(color);
-                            });
-                          },
-                        );
-                      }).toList(),
-                    ),
-                     const SizedBox(height: 24),
-                    Text('المقاس', style: Theme.of(context).textTheme.titleLarge),
-                    Wrap(
-                      spacing: 8.0,
-                      children: _availableSizes.map((size) {
-                        final isSelected = _selectedSizes.contains(size);
-                        return FilterChip(
-                          label: Text(size),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            setSheetState(() {
-                              isSelected ? _selectedSizes.remove(size) : _selectedSizes.add(size);
-                            });
-                          },
-                        );
-                      }).toList(),
-                    ),
-                    const Spacer(),
-                    Row(
-                      children: [
-                        Expanded(child: OutlinedButton(onPressed: _resetFilters, child: const Text('إعادة تعيين'))),
-                        const SizedBox(width: 12),
-                        Expanded(child: ElevatedButton(onPressed: () {
-                          _applyAllFilters();
-                          Navigator.of(context).pop();
-                        }, child: const Text('تطبيق'))),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+              builder: (_, scrollController) {
+                // --- ابدأ التعديل الرئيسي هنا ---
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                  child: Column(
+                    children: [
+                      Text('الفلاتر', style: Theme.of(context).textTheme.headlineSmall),
+                      const Divider(height: 24),
+                      // المحتوى القابل للتمرير
+                      Expanded(
+                        child: ListView( // استخدمنا ListView لجعل المحتوى قابل للتمرير
+                          controller: scrollController, // <-- ربطنا الـ controller هنا
+                          children: [
+                            Text('السعر (EGP)', style: Theme.of(context).textTheme.titleLarge),
+                            RangeSlider(
+                              values: _priceRange,
+                              min: 0,
+                              max: 1000,
+                              divisions: 20,
+                              labels: RangeLabels('${_priceRange.start.round()}', '${_priceRange.end.round()}'),
+                              onChanged: (values) => setSheetState(() => _priceRange = values),
+                            ),
+                            const SizedBox(height: 24),
+                            Text('اللون', style: Theme.of(context).textTheme.titleLarge),
+                            Wrap(
+                              spacing: 8.0,
+                              children: _availableColors.map((color) {
+                                final isSelected = _selectedColors.contains(color);
+                                return FilterChip(
+                                  label: Text(color),
+                                  selected: isSelected,
+                                  onSelected: (selected) {
+                                    setSheetState(() {
+                                      isSelected ? _selectedColors.remove(color) : _selectedColors.add(color);
+                                    });
+                                  },
+                                );
+                              }).toList(),
+                            ),
+                            const SizedBox(height: 24),
+                            Text('المقاس', style: Theme.of(context).textTheme.titleLarge),
+                            Wrap(
+                              spacing: 8.0,
+                              children: _availableSizes.map((size) {
+                                final isSelected = _selectedSizes.contains(size);
+                                return FilterChip(
+                                  label: Text(size),
+                                  selected: isSelected,
+                                  onSelected: (selected) {
+                                    setSheetState(() {
+                                      isSelected ? _selectedSizes.remove(size) : _selectedSizes.add(size);
+                                    });
+                                  },
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // الأزرار ثابتة في الأسفل
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(child: OutlinedButton(onPressed: _resetFilters, child: const Text('إعادة تعيين'))),
+                          const SizedBox(width: 12),
+                          Expanded(child: ElevatedButton(onPressed: () {
+                            _applyAllFilters();
+                            Navigator.of(context).pop();
+                          }, child: const Text('تطبيق'))),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+                // --- نهاية التعديل الرئيسي ---
+              },
             );
           },
         );
@@ -214,8 +220,6 @@ class _SearchPageState extends State<SearchPage> {
               ),
               itemCount: _filteredProducts.length,
               itemBuilder: (context, index) {
-                // ملاحظة: قد تحتاج لتعديل بسيط على ProductCard لتعمل هنا
-                // بشكل خاص، تأكد من أن دوال onCardTap و onAddToCart تعمل بشكل صحيح
                 final product = _filteredProducts[index];
                 return ProductCard(
                   product: product,
@@ -223,7 +227,8 @@ class _SearchPageState extends State<SearchPage> {
                      Navigator.push(context, MaterialPageRoute(builder: (context) => ProductDetailPage(product: product)));
                   },
                   onAddToCart: () {
-                     // يمكنك إضافة منطق إضافة للسلة هنا إذا أردت
+                     final cartService = CartService();
+                     cartService.addToCart(product, 1);
                      ScaffoldMessenger.of(context).showSnackBar(
                        SnackBar(content: Text('تمت إضافة "${product.name}" إلى السلة'))
                      );
