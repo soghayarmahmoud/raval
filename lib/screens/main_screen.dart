@@ -15,7 +15,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0; // الصفحة الرئيسية هي الصفحة الافتراضية
+  int _selectedIndex = 2; // الصفحة الرئيسية هي الصفحة الافتراضية
 
   // قائمة الصفحات التي سيتم التنقل بينها
   static const List<Widget> _pages = <Widget>[
