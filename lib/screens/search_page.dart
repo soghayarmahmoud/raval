@@ -1,5 +1,6 @@
 // In lib/screens/search_page.dart
 import 'package:flutter/material.dart';
+import 'package:store/models/product_model.dart';
 import 'package:store/screens/home_page.dart';
 import 'package:store/screens/product_detail_page.dart';
 import 'package:store/services/cart_service.dart';

@@ -4,6 +4,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:store/screens/category_product_page.dart';
 import 'package:store/services/cart_service.dart';
 import 'package:store/screens/cart_page.dart';
+import 'package:store/models/product_model.dart';
 import 'product_detail_page.dart';
 import 'package:store/theme.dart';
 
@@ -19,60 +20,6 @@ class CategoryModel {
   final String name;
   final String id;
   CategoryModel({required this.name, required this.id});
-}
-
-class ProductModel {
-  final String id;
-  final String name;
-  final String description;
-  final double price;
-  final double? salePrice;
-  final String imageUrl;
-  final List<String> otherImages;
-  final List<String> tags;
-  final List<String> sizes;
-  final List<String> colors;
-  bool isFavorite;
-
-  ProductModel({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.price,
-    this.salePrice,
-    required this.imageUrl,
-    this.otherImages = const [],
-    this.tags = const [],
-    this.sizes = const [],
-    this.colors = const [],
-    this.isFavorite = false,
-  });
-
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'description': description,
-        'price': price,
-        'salePrice': salePrice,
-        'imageUrl': imageUrl,
-        'otherImages': otherImages,
-        'tags': tags,
-        'sizes': sizes,
-        'colors': colors,
-      };
-
-  factory ProductModel.fromJson(Map<String, dynamic> json) => ProductModel(
-        id: json['id'],
-        name: json['name'],
-        description: json['description'] ?? '',
-        price: (json['price'] as num).toDouble(),
-        salePrice: (json['salePrice'] as num?)?.toDouble(),
-        imageUrl: json['imageUrl'],
-        otherImages: List<String>.from(json['otherImages'] ?? []),
-        tags: List<String>.from(json['tags'] ?? []),
-        sizes: List<String>.from(json['sizes'] ?? []),
-        colors: List<String>.from(json['colors'] ?? []),
-      );
 }
 
 // ------------------- 2. Data Service -------------------
@@ -113,26 +60,44 @@ class HomeDataService {
         salePrice: 399.00,
         imageUrl:
             'https://africanclothingstore.co.uk/wp-content/uploads/2020/12/DSC_0353.jpg',
-        otherImages: [
+        images: [
           'https://www.foreverkidz.in/cdn/shop/files/WhatsAppImage2025-08-29at2.58.50PM.jpg?v=1756462531&width=3000',
           'https://img.faballey.com/images/Product/AIC00007L/4.jpg',
         ],
         description:
             'فستان بناتي رائع مصنوع من أجود أنواع القطن، مناسب لفصل الربيع والخريف. تصميم أنيق بألوان زاهية.',
         tags: ['بناتي', 'فساتين', 'ربيعي'],
-        sizes: ['S', 'M', 'L'],
-        colors: ['وردي', 'أبيض'],
+        availableSizes: ['S', 'M', 'L'],
+        availableColors: ['FF69B4', 'FFFFFF'],
+        isFavorite: false,
+        stock: 10,
+        category: 'بناتي',
+        additionalInfo: {
+          'المواد': 'قطن',
+          'الموسم': 'ربيع/خريف',
+          'نمط': 'كاجوال',
+        },
       ),
       ProductModel(
-          id: 'p2',
-          name: 'طقم ولادي صيفي',
-          price: 380.50,
-          imageUrl:
-              'https://images.pexels.com/photos/4263705/pexels-photo-4263705.jpeg',
-          description: 'وصف المنتج هنا',
-          tags: ['ولادي'],
-          sizes: ['M', 'L', 'XL'],
-          colors: ['أزرق']),
+        id: 'p2',
+        name: 'طقم ولادي صيفي',
+        price: 380.50,
+        imageUrl:
+            'https://images.pexels.com/photos/4263705/pexels-photo-4263705.jpeg',
+        description:
+            'طقم ولادي مميز مناسب لفصل الصيف، خامة قطنية مريحة وألوان زاهية',
+        tags: ['ولادي', 'صيفي'],
+        availableSizes: ['M', 'L', 'XL'],
+        availableColors: ['0000FF'],
+        isFavorite: false,
+        stock: 15,
+        category: 'ولادي',
+        additionalInfo: {
+          'المواد': 'قطن',
+          'الموسم': 'صيف',
+          'نمط': 'سبورت',
+        },
+      ),
     ];
   }
 
@@ -144,10 +109,20 @@ class HomeDataService {
         price: 600.00,
         imageUrl:
             'https://images.pexels.com/photos/34222783/pexels-photo-34222783.jpeg',
-        description: 'وصف المنتج هنا',
+        description:
+            'جاكيت شتوي دافئ مناسب لفصل الشتاء، بتصميم عصري وخامة ممتازة',
         tags: ['شتوي', 'ولادي'],
-        sizes: ['S', 'M'],
-        colors: ['أسود'],
+        availableSizes: ['S', 'M'],
+        availableColors: ['000000'],
+        isFavorite: false,
+        stock: 8,
+        category: 'ولادي',
+        additionalInfo: {
+          'المواد': 'صوف وبوليستر',
+          'الموسم': 'شتاء',
+          'نمط': 'كاجوال',
+          'البطانة': 'مبطن',
+        },
       ),
     ];
   }
@@ -161,7 +136,8 @@ class HomePage extends StatefulWidget {
 }
 
 // --- تم التعديل هنا ---
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   final HomeDataService _dataService = HomeDataService();
   final CartService _cartService = CartService();
   late List<CategoryModel> _categories;
@@ -189,18 +165,25 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     if (_tabController.indexIsChanging) {
       if (_tabController.index != 0) {
         final selectedCategory = _categories[_tabController.index];
-        
+
         // في تطبيق حقيقي، ستقوم بجلب المنتجات من قاعدة البيانات بناءً على الصنف
         // حاليًا، سنقوم بتمرير كل المنتجات كمثال
-        final allProducts = [..._dataService.getNewArrivals(), ..._dataService.getBestOffers()];
-        final categoryProducts = allProducts.where((p) => p.tags.contains(selectedCategory.name)).toList();
+        final allProducts = [
+          ..._dataService.getNewArrivals(),
+          ..._dataService.getBestOffers()
+        ];
+        final categoryProducts = allProducts
+            .where((p) => p.tags.contains(selectedCategory.name))
+            .toList();
 
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => CategoryProductsPage(
               categoryName: selectedCategory.name,
-              products: categoryProducts.isEmpty ? allProducts : categoryProducts, // fallback to all if empty
+              products: categoryProducts.isEmpty
+                  ? allProducts
+                  : categoryProducts, // fallback to all if empty
             ),
           ),
         ).then((_) {
@@ -234,7 +217,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   void _navigateToProductDetail(ProductModel product) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => ProductDetailPage(product: product)),
+      MaterialPageRoute(
+          builder: (context) => ProductDetailPage(product: product)),
     ).then((_) => _loadCartCount());
   }
 
@@ -264,8 +248,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
-          tabs: _categories.map((category) => Tab(text: category.name)).toList(),
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          tabs:
+              _categories.map((category) => Tab(text: category.name)).toList(),
+          labelStyle:
+              const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
         ),
       ),
@@ -423,8 +409,8 @@ class ProductCard extends StatelessWidget {
                               height: 200,
                               width: 180,
                               color: Colors.grey[200],
-                              child:
-                                  const Center(child: CircularProgressIndicator()));
+                              child: const Center(
+                                  child: CircularProgressIndicator()));
                     },
                     errorBuilder: (context, error, stackTrace) {
                       return Container(

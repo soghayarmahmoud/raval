@@ -1,65 +1,59 @@
-// In lib/auth_service.dart
+// lib/services/auth_service.dart
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:store/services/google_auth_service.dart';
-import 'package:store/services/apple_auth_service.dart';
 
 class AuthService {
+  // Keys for saving user data locally
   static const String _isLoggedInKey = 'isLoggedIn';
   static const String _userNameKey = 'userName';
   static const String _userPhoneKey = 'userPhone';
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Stream للاستماع لتغيرات حالة تسجيل الدخول في كل التطبيق
-  // هذا الـ Stream سيخبرنا فورًا عند تسجيل الدخول أو الخروج
+  // Stream to listen for authentication state changes throughout the app
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  // جلب المستخدم الحالي
+  // Get the current user
   User? get currentUser => _auth.currentUser;
 
-  // Sign in with Google
-  Future<UserCredential?> signInWithGoogle() async {
-    final googleService = GoogleAuthService();
-    return await googleService.signInWithGoogle();
-  }
-
-  // Sign in with Apple
-  Future<UserCredential?> signInWithApple() async {
-    final appleService = AppleAuthService();
-    return await appleService.signInWithApple();
-  }
-
-  // تسجيل الخروج
+  // Complete sign-out from the app
   Future<void> signOut() async {
-    await GoogleAuthService().signOut(); // Sign out from Google if signed in
-    await AppleAuthService().signOut(); // Sign out from Apple if signed in
-    await _auth.signOut(); // Sign out from Firebase
+    try {
+      // 1. Sign out from Google first (if the user was signed in with it)
+      await GoogleSignIn.instance.signOut();
+
+      // 2. Sign out from Firebase (applies to all sign-in methods)
+      await _auth.signOut();
+
+      // 3. Clear the local session data from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+    } catch (e) {
+      // Print any error that might occur during sign-out
+      print("Error during sign out: $e");
+    }
   }
 
-  // التحقق مما إذا كان المستخدم قد سجل الدخول من قبل
+  // Check if the user was previously logged in (via local data)
   Future<bool> isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_isLoggedInKey) ?? false;
   }
 
-  // حفظ بيانات المستخدم بعد إنشاء الحساب
-  Future<void> signUp(String name, String phone) async {
+  // Save user data to SharedPreferences after a successful sign-up/login
+  Future<void> saveUserSession(String name, String phone) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_isLoggedInKey, true);
     await prefs.setString(_userNameKey, name);
     await prefs.setString(_userPhoneKey, phone);
   }
 
-  // جلب اسم المستخدم المحفوظ
+  // Get the saved user name
   Future<String?> getUserName() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_userNameKey);
   }
-
-  // تسجيل الخروج (للمستقبل)
-  Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear(); // حذف كل البيانات المحفوظة
-  }
 }
+

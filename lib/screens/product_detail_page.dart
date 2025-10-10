@@ -1,12 +1,13 @@
-// In lib/screens/product_detail_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:store/providers/favorites_provider.dart';
-import 'package:store/services/cart_service.dart';
-import 'package:store/screens/cart_page.dart';
-import 'home_page.dart';
+import 'package:store/providers/dynamic_text_provider.dart';
 
-// حولنا الصفحة إلى StatefulWidget لنتمكن من إدارة حالة عداد الكمية
+import 'package:store/services/cart_service.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:store/models/product_model.dart';
+
 class ProductDetailPage extends StatefulWidget {
   final ProductModel product;
 
@@ -16,46 +17,154 @@ class ProductDetailPage extends StatefulWidget {
   State<ProductDetailPage> createState() => _ProductDetailPageState();
 }
 
-class _ProductDetailPageState extends State<ProductDetailPage> {
+class _ProductDetailPageState extends State<ProductDetailPage>
+    with SingleTickerProviderStateMixin {
   final CartService _cartService = CartService();
-  int _quantity = 1; // متغير لحفظ الكمية المختارة
+  final CarouselSliderController _carouselController = CarouselSliderController();
+  late final AnimationController _slideController;
+  int _currentImageIndex = 0;
+  int _quantity = 1;
+  String? _selectedColor;
+  String? _selectedSize;
+
+  @override
+  void initState() {
+    super.initState();
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _slideController.dispose();
+    super.dispose();
+  }
+
+  void _showFullScreenImage(BuildContext context, String imageUrl) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          backgroundColor: Colors.black,
+          body: Stack(
+            children: [
+              PhotoView(
+                imageProvider: NetworkImage(imageUrl),
+                minScale: PhotoViewComputedScale.contained,
+                maxScale: PhotoViewComputedScale.covered * 2,
+                heroAttributes:
+                    PhotoViewHeroAttributes(tag: 'product-image-$imageUrl'),
+              ),
+              Positioned(
+                top: 40,
+                right: 20,
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final favoritesProvider = Provider.of<FavoritesProvider>(context);
-    final isFav = favoritesProvider.isFavorite(widget.product);
+    final dynamicTextProvider = Provider.of<DynamicTextProvider>(context);
+    final isFavorite = favoritesProvider.isFavorite(widget.product);
+    final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.product.name),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Image.network(widget.product.imageUrl,
-                height: 400, width: double.infinity, fit: BoxFit.cover),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 400,
+            pinned: true,
+            backgroundColor: theme.scaffoldBackgroundColor,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Stack(
+                children: [
+                  CarouselSlider(
+                    carouselController: _carouselController,
+                    options: CarouselOptions(
+                      height: double.infinity,
+                      viewportFraction: 1,
+                      autoPlay: true,
+                      autoPlayInterval: const Duration(seconds: 3),
+                      onPageChanged: (index, reason) {
+                        setState(() => _currentImageIndex = index);
+                      },
+                    ),
+                    items: widget.product.images.map((url) {
+                      return GestureDetector(
+                        onTap: () => _showFullScreenImage(context, url),
+                        child: Hero(
+                          tag: 'product-image-$url',
+                          child: Image.network(
+                            url,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  Positioned(
+                    bottom: 20,
+                    left: 0,
+                    right: 0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children:
+                          widget.product.images.asMap().entries.map((entry) {
+                        return GestureDetector(
+                          onTap: () =>
+                              _carouselController.jumpToPage(entry.key),
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: theme.primaryColor.withOpacity(
+                                _currentImageIndex == entry.key ? 1 : 0.4,
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // --- نقلنا زر المفضلة هنا ---
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
                         child: Text(
                           widget.product.name,
-                          style: const TextStyle(
-                              fontSize: 28, fontWeight: FontWeight.bold),
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       IconButton(
-                        iconSize: 30,
                         icon: Icon(
-                          isFav ? Icons.favorite : Icons.favorite_border,
-                          color: isFav ? Colors.red : Colors.grey,
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: isFavorite ? Colors.red : null,
                         ),
                         onPressed: () {
                           favoritesProvider.toggleFavorite(widget.product);
@@ -63,31 +172,84 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
                   Text(
-                    '${widget.product.price.toStringAsFixed(2)} EGP',
+                    '\$${widget.product.price.toStringAsFixed(2)}',
                     style: TextStyle(
-                        fontSize: 22,
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.bold),
+                      fontSize: 24,
+                      color: theme.primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
+                  if (widget.product.availableColors.isNotEmpty) ...[
+                    Text(
+                      dynamicTextProvider.getText('available_colors'),
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 50,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: widget.product.availableColors.length,
+                        itemBuilder: (context, index) {
+                          final color = widget.product.availableColors[index];
+                          final isSelected = color == _selectedColor;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: GestureDetector(
+                              onTap: () =>
+                                  setState(() => _selectedColor = color),
+                              child: CircleAvatar(
+                                radius: 25,
+                                backgroundColor: Color(int.parse('0xFF$color')),
+                                child: isSelected
+                                    ? const Icon(Icons.check,
+                                        color: Colors.white)
+                                    : null,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                  if (widget.product.availableSizes.isNotEmpty) ...[
+                    Text(
+                      dynamicTextProvider.getText('available_sizes'),
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: widget.product.availableSizes.map((size) {
+                        final isSelected = size == _selectedSize;
+                        return ChoiceChip(
+                          label: Text(size),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(
+                                () => _selectedSize = selected ? size : null);
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
                   Text(
-                    widget.product.description,
-                    style: const TextStyle(fontSize: 16, height: 1.5),
+                    dynamicTextProvider.getText('quantity'),
+                    style: theme.textTheme.titleMedium,
                   ),
-                  const SizedBox(height: 30),
-
-                  // --- إضافة عداد الكمية ---
+                  const SizedBox(height: 12),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('الكمية:', style: TextStyle(fontSize: 18)),
-                      const SizedBox(width: 20),
                       Container(
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade300),
-                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: theme.primaryColor),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
                           children: [
@@ -95,21 +257,18 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               icon: const Icon(Icons.remove),
                               onPressed: () {
                                 if (_quantity > 1) {
-                                  setState(() {
-                                    _quantity--;
-                                  });
+                                  setState(() => _quantity--);
                                 }
                               },
                             ),
-                            Text('$_quantity',
-                                style: const TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold)),
+                            Text(
+                              '$_quantity',
+                              style: const TextStyle(fontSize: 18),
+                            ),
                             IconButton(
                               icon: const Icon(Icons.add),
                               onPressed: () {
-                                setState(() {
-                                  _quantity++;
-                                });
+                                setState(() => _quantity++);
                               },
                             ),
                           ],
@@ -117,47 +276,93 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 30),
-
-                  // --- أزرار الإضافة للسلة والشراء الآن ---
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _cartService.addToCart(widget.product, _quantity);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                'تمت إضافة $_quantity من "${widget.product.name}" إلى السلة'),
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      },
-                      child: const Text('إضافة إلى السلة',
-                          style: TextStyle(fontSize: 18)),
-                    ),
+                  const SizedBox(height: 24),
+                  Text(
+                    dynamicTextProvider.getText('description'),
+                    style: theme.textTheme.titleMedium,
                   ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: OutlinedButton( // <-- الزر الجديد بلون مختلف
-                      onPressed: () {
-                        _cartService.addToCart(widget.product, _quantity);
-                        // الانتقال مباشرة إلى صفحة السلة
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const CartPage()));
-                      },
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Theme.of(context).primaryColor,
-                        side: BorderSide(color: Theme.of(context).primaryColor, width: 2),
-                      ),
-                      child: const Text('الشراء الآن',
-                          style: TextStyle(fontSize: 18)),
-                    ),
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.product.description,
+                    style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
                   ),
+                  const SizedBox(height: 24),
+                  if (widget.product.additionalInfo.isNotEmpty) ...[
+                    Text(
+                      dynamicTextProvider.getText('additional_info'),
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    ...widget.product.additionalInfo.entries.map((entry) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${entry.key}: ',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            Expanded(child: Text(entry.value)),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ],
                 ],
               ),
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.scaffoldBackgroundColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              offset: const Offset(0, -4),
+              blurRadius: 8,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () {
+                  _cartService.addToCart(widget.product, _quantity);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        dynamicTextProvider.getText('added_to_cart'),
+                      ),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: Text(dynamicTextProvider.getText('add_to_cart')),
+              ),
+            ),
+            const SizedBox(width: 16),
+            IconButton(
+              onPressed: () {
+                favoritesProvider.toggleFavorite(widget.product);
+              },
+              icon: Icon(
+                isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: isFavorite ? Colors.red : null,
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                // Share product logic
+              },
+              icon: const Icon(Icons.share),
             ),
           ],
         ),

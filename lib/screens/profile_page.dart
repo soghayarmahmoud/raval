@@ -1,4 +1,7 @@
 // In lib/screens/profile_page.dart
+import 'dart:math';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -29,40 +32,85 @@ class ServiceBoxModel {
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
+// In lib/screens/profile_page.dart
 
-  Future<void> _handleGoogleSignIn(BuildContext context) async {
-    try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return;
+// ... (باقي الكود في ملفك كما هو)
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+// // استخدم هذه الدالة النهائية بدلاً من أي نسخة قديمة
+// Future<void> _handleGoogleSignIn(BuildContext context) async {
+//   try {
+//     // الخطوة 1: اطلب من المستخدم تسجيل الدخول بحسابه في جوجل
+//     // هذا السطر يفتح نافذة جوجل المنبثقة للاختيار من بين الحسابات
+    
+//     final GoogleSignInAccount? googleUser = await GoogleSignIn.signIn();
 
-      await FirebaseAuth.instance.signInWithCredential(credential);
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to sign in with Google: $e')),
-      );
-    }
-  }
+//     // الخطوة 2: تحقق مما إذا كان المستخدم قد ألغى العملية
+//     if (googleUser == null) {
+//       // ألغى المستخدم تسجيل الدخول، لا تفعل شيئًا
+//       print('Google Sign-In was canceled.');
+//       return;
+//     }
+
+//     // الخطوة 3: احصل على توكنات المصادقة من جوجل بعد نجاح الدخول
+//     final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+//     // الخطوة 4: تأكد من أن التوكنات ليست فارغة (خطوة أمان إضافية)
+//     if (googleAuth.idToken == null || googleAuth.idToken == null) {
+//       throw 'Missing Google Auth Tokens';
+//     }
+
+//     // الخطوة 5: أنشئ "بيانات اعتماد" خاصة بـ Firebase باستخدام التوكنات
+//     final credential = GoogleAuthProvider.credential(
+//       accessToken: googleAuth.idToken,
+//       idToken: googleAuth.idToken,
+//     );
+
+//     // الخطوة 6: استخدم بيانات الاعتماد لتسجيل الدخول فعليًا في Firebase
+//     final userCredential =
+//         await FirebaseAuth.instance.signInWithCredential(credential);
+
+//     // الخطوة 7: أظهر رسالة نجاح (مع التأكد من أن الصفحة ما زالت معروضة)
+//     if (!context.mounted) return;
+
+//     if (userCredential.user != null) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(
+//           content: Text('تم تسجيل الدخول بنجاح باستخدام جوجل'),
+//           backgroundColor: Colors.green,
+//         ),
+//       );
+//     }
+//   } catch (e) {
+//     // في حالة حدوث أي خطأ، اطبعه وأظهر رسالة للمستخدم
+//     print('Error during Google Sign-In: $e');
+//     if (!context.mounted) return;
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       SnackBar(
+//         content: Text('فشل تسجيل الدخول: ${e.toString()}'),
+//         backgroundColor: Colors.red,
+//       ),
+//     );
+//   }
+// }
+
+// ... (باقي الكود في ملفك كما هو)
 
   Future<void> _handleAppleSignIn(BuildContext context) async {
+    final rawNonce = _generateNonce();
+    final nonce = sha256.convert(utf8.encode(rawNonce)).toString();
+
     try {
       final credential = await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
         ],
+        nonce: nonce,
       );
 
       final oauthCredential = OAuthProvider('apple.com').credential(
         idToken: credential.identityToken,
-        accessToken: credential.authorizationCode,
+        rawNonce: rawNonce,
       );
 
       await FirebaseAuth.instance.signInWithCredential(oauthCredential);
@@ -72,6 +120,15 @@ class ProfilePage extends StatelessWidget {
         SnackBar(content: Text('Failed to sign in with Apple: $e')),
       );
     }
+  }
+
+  // دالة مساعدة لإنشاء Nonce
+  String _generateNonce([int length = 32]) {
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(length, (_) => charset[random.nextInt(charset.length)])
+        .join();
   }
 
   @override
@@ -103,12 +160,12 @@ class ProfilePage extends StatelessWidget {
           id: '1',
           name: 'المنزل',
           details: 'حولي، قطعة 5، شارع 10، منزل 15',
-          governorate: ''),
+          governorate: 'حولي'),
       AddressModel(
           id: '2',
           name: 'العمل',
           details: 'مدينة الكويت، برج التجارية، الدور 20',
-          governorate: ''),
+          governorate: 'العاصمة'),
     ];
 
     return Scaffold(
@@ -297,8 +354,8 @@ class ProfilePage extends StatelessWidget {
             const Divider(),
             const SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: () => _handleGoogleSignIn(context),
-              icon: const Icon(Icons.g_mobiledata),
+              onPressed: () =>{} /*_handleGoogleSignIn(context)*/,
+              icon: const Icon(Icons.g_mobiledata), // يمكنك تغيير الأيقونة
               label: Text(dynamicTextProvider.getText('googleSignIn')),
             ),
             const SizedBox(height: 8),
@@ -313,8 +370,8 @@ class ProfilePage extends StatelessWidget {
       ),
     );
   }
-
-  // (باقي الويدجتس تبقى كما هي بدون تغيير)
+  
+  // (باقي الويدجتس تبقى كما هي)
   Widget _buildServiceBox(
       {required String title,
       required IconData icon,
@@ -372,7 +429,7 @@ class ProfilePage extends StatelessWidget {
                     children: [
                       Text(address.governorate),
                       Text(address.details),
-                      if (address.latitude != null)
+                      if (address.latitude != null && address.longitude != null)
                         Text(
                             'Location: ${address.latitude!.toStringAsFixed(6)}, ${address.longitude!.toStringAsFixed(6)}'),
                     ],
@@ -383,12 +440,13 @@ class ProfilePage extends StatelessWidget {
                         final result = await Navigator.push<bool>(
                           context,
                           MaterialPageRoute(
-                            builder: (c) => AddAddressPage(
+                            builder: (c) => const AddAddressPage(
                               isRequired: false,
                             ),
                           ),
                         );
                         if (result == true) {
+                          if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                                 content: Text('تم تحديث العنوان بنجاح')),
@@ -399,11 +457,12 @@ class ProfilePage extends StatelessWidget {
                           context: context,
                           builder: (context) => AlertDialog(
                             title: const Text('تأكيد الحذف'),
-                            content:
-                                const Text('هل أنت متأكد من حذف هذا العنوان؟'),
+                            content: const Text(
+                                'هل أنت متأكد من حذف هذا العنوان؟'),
                             actions: [
                               TextButton(
-                                onPressed: () => Navigator.pop(context, false),
+                                onPressed: () =>
+                                    Navigator.pop(context, false),
                                 child: const Text('إلغاء'),
                               ),
                               TextButton(
@@ -429,7 +488,8 @@ class ProfilePage extends StatelessWidget {
                             if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('حدث خطأ أثناء حذف العنوان'),
+                                content:
+                                    Text('حدث خطأ أثناء حذف العنوان'),
                                 backgroundColor: Colors.red,
                               ),
                             );
@@ -501,7 +561,6 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _buildSettingsMenu(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     final localeProvider = Provider.of<LocaleProvider>(context, listen: false);
 
     return Card(
@@ -608,7 +667,7 @@ class ProfilePage extends StatelessWidget {
           ListTile(
               leading: const Icon(Icons.support_agent_outlined),
               title: Text(
-                  dynamicTextProvider.getText('supportChat') ?? 'Support Chat'),
+                  dynamicTextProvider.getText('supportChat')),
               onTap: () {
                 Navigator.push(
                   context,
@@ -618,7 +677,7 @@ class ProfilePage extends StatelessWidget {
               }),
           ListTile(
               leading: const Icon(Icons.help_outline),
-              title: Text(dynamicTextProvider.getText('faq') ?? 'FAQ'),
+              title: Text(dynamicTextProvider.getText('faq')),
               onTap: () {
                 Navigator.push(
                   context,
@@ -646,6 +705,3 @@ class ProfilePage extends StatelessWidget {
   }
 }
 
-extension on GoogleSignInAuthentication {
-  // String? get accessToken => null;
-}

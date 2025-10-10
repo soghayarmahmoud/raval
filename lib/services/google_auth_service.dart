@@ -1,40 +1,47 @@
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:store/services/google_auth_service.dart';
 
-class GoogleAuthService {
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: [
-      'email',
-      'profile',
-    ],
-  );
+// class GoogleAuthService {
+//   final GoogleSignIn _googleSignIn = GoogleSignIn.standard();
 
-  Future<UserCredential?> signInWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return null;
+//   Future<UserCredential?> signInWithGoogle() async {
+//     try {
+//       // Trigger the authentication flow
+//       final GoogleSignInAccount? googleUser = await _googleSignIn.signInSilently();
+//       if (googleUser == null) return null; // The user canceled the sign-in
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+//       // Obtain the auth details from the request
+//       final GoogleSignInAuthentication googleAuth =
+//           await googleUser.authentication;
 
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+//       // Create a new credential
+//       final OAuthCredential credential = GoogleAuthProvider.credential(
+//         accessToken: googleAuth.accessToken,
+//         idToken: googleAuth.idToken,
+//       );
 
-      return await FirebaseAuth.instance.signInWithCredential(credential);
-    } catch (e) {
-      print('Error signing in with Google: $e');
-      return null;
-    }
-  }
+//       // Once signed in, return the UserCredential
+//       return await FirebaseAuth.instance.signInWithCredential(credential);
+//     } catch (e) {
+//       print('Error signing in with Google: $e');
+//       return null;
+//     }
+//   }
 
-  Future<void> signOut() async {
-    try {
-      await _googleSignIn.signOut();
-      await FirebaseAuth.instance.signOut();
-    } catch (e) {
-      print('Error signing out: $e');
-    }
-  }
-}
+//   Future<void> signOut() async {
+//     try {
+//       await _googleSignIn.signOut();
+//       await FirebaseAuth.instance.signOut();
+//     } catch (e) {
+//       print('Error signing out: $e');
+//     }
+//   }
+// }
+
+// class standard {
+// }
+
+// extension on GoogleSignInAuthentication {
+//   String? get accessToken => null;
+// }

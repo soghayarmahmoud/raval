@@ -1,4 +1,5 @@
 // In lib/models/cart_item_model.dart
+import 'package:store/models/product_model.dart';
 import 'package:store/screens/home_page.dart';
 
 class CartItemModel {
