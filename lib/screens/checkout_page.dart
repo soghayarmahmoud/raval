@@ -21,8 +21,8 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
   late Animation<double> _fadeAnimation;
 
   final List<AddressModel> _userAddresses = [
-    AddressModel(id: '1', name: 'المنزل', details: 'حولي، قطعة 5، شارع 10، منزل 15'),
-    AddressModel(id: '2', name: 'العمل', details: 'مدينة الكويت، برج التجارية، الدور 20'),
+    AddressModel(id: '1', name: 'المنزل', details: 'حولي، قطعة 5، شارع 10، منزل 15', governorate: ''),
+    AddressModel(id: '2', name: 'العمل', details: 'مدينة الكويت، برج التجارية، الدور 20', governorate: ''),
   ];
   AddressModel? _selectedAddress;
   
@@ -88,17 +88,13 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
         'https://your-error-url.com' as Function(String invoiceId)?,   // TODO: replace with your real error/cancel URL
       );
 
-      if (response != null) {
-        final status = response.invoiceStatus?.toString().toLowerCase() ?? '';
-        if (status.contains('paid')) {
-          _showSuccessDialog('عملية الدفع تمت بنجاح!', 'رقم الفاتورة: ${response.invoiceId}');
-        } else {
-          _showErrorDialog('فشلت عملية الدفع', 'لم يتم تأكيد الدفع.');
-        }
+      final status = response.invoiceStatus?.toString().toLowerCase() ?? '';
+      if (status.contains('paid')) {
+        _showSuccessDialog('عملية الدفع تمت بنجاح!', 'رقم الفاتورة: ${response.invoiceId}');
       } else {
-        _showErrorDialog('فشلت عملية الدفع', 'لم يتم استلام استجابة من بوابة الدفع.');
+        _showErrorDialog('فشلت عملية الدفع', 'لم يتم تأكيد الدفع.');
       }
-    } catch (e) {
+        } catch (e) {
       _showErrorDialog('حدث خطأ', e.toString());
     } finally {
        if (mounted) {
@@ -257,7 +253,7 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
               ],
             ),
             const SizedBox(height: 16),
-            ..._userAddresses.map((address) => _buildAddressCard(address)).toList(),
+            ..._userAddresses.map((address) => _buildAddressCard(address)),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
@@ -682,14 +678,14 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
                   child: InkWell(
                     onTap: _handlePayment,
                     borderRadius: BorderRadius.circular(16),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 18),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 18),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.payment, color: Colors.white, size: 24),
-                          const SizedBox(width: 12),
-                          const Text(
+                          Icon(Icons.payment, color: Colors.white, size: 24),
+                          SizedBox(width: 12),
+                          Text(
                             'إتمام الدفع',
                             style: TextStyle(
                               fontSize: 18,

@@ -7,7 +7,6 @@ import 'package:store/providers/theme_provider.dart';
 import 'package:store/screens/splash_screen.dart';
 import 'theme.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:store/firebase_options.dart';
 import 'package:store/services/notification_service.dart';

@@ -1,3 +1,7 @@
+buildscript {
+   val kotlinVersion = "1.7.10" // استخدم val بدلاً من ext.kotlin_version
+}
+
 allprojects {
     repositories {
         google()

@@ -1,0 +1,99 @@
+{
+    "@@locale": "en",
+    "appTitle": "Our Store",
+    "@appTitle": {
+        "description": "The title of the application"
+    },
+    "cartPageTitle": "Shopping Cart",
+    "@cartPageTitle": {
+        "description": "Title of the shopping cart page"
+    },
+    "checkoutButtonText": "Proceed to Checkout",
+    "@checkoutButtonText": {
+        "description": "Text for the checkout button"
+    },
+    "addAddressTitle": "Add New Address",
+    "@addAddressTitle": {
+        "description": "Title of the add address page"
+    },
+    "selectLocation": "Select Location",
+    "@selectLocation": {
+        "description": "Text for selecting location"
+    },
+    "governorate": "Governorate",
+    "@governorate": {
+        "description": "Label for governorate selection"
+    },
+    "addressDetails": "Address Details",
+    "@addressDetails": {
+        "description": "Label for address details"
+    },
+    "saveAddress": "Save Address",
+    "@saveAddress": {
+        "description": "Button text for saving address"
+    },
+    "settings": "Settings",
+    "@settings": {
+        "description": "Settings section title"
+    },
+    "language": "Language",
+    "@language": {
+        "description": "Language selection title"
+    },
+    "theme": "Theme",
+    "@theme": {
+        "description": "Theme selection title"
+    },
+    "lightTheme": "Light",
+    "@lightTheme": {
+        "description": "Light theme option"
+    },
+    "darkTheme": "Dark",
+    "@darkTheme": {
+        "description": "Dark theme option"
+    },
+    "systemTheme": "System",
+    "@systemTheme": {
+        "description": "System theme option"
+    },
+    "addresses": "Saved Addresses",
+    "@addresses": {
+        "description": "Saved addresses section title"
+    },
+    "noAddresses": "No saved addresses",
+    "@noAddresses": {
+        "description": "Text shown when no addresses are saved"
+    },
+    "addNewAddress": "Add New Address",
+    "@addNewAddress": {
+        "description": "Button text for adding new address"
+    },
+    "editAddress": "Edit Address",
+    "@editAddress": {
+        "description": "Edit address option"
+    },
+    "deleteAddress": "Delete Address",
+    "@deleteAddress": {
+        "description": "Delete address option"
+    },
+    "confirmDelete": "Confirm Delete",
+    "@confirmDelete": {
+        "description": "Confirmation dialog title for delete"
+    },
+    "deleteAddressConfirm": "Are you sure you want to delete this address?",
+    "@deleteAddressConfirm": {
+        "description": "Confirmation message for address deletion"
+    },
+    "yes": "Yes",
+    "@yes": {
+        "description": "Yes button text"
+    },
+    "no": "No",
+    "@no": {
+        "description": "No button text"
+    },
+    "cancel": "Cancel",
+    "@cancel": {
+        "description": "Cancel button text"
+    }
+}

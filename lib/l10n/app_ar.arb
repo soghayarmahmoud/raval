@@ -1,0 +1,98 @@
+{
+    "appTitle": "متجرنا",
+    "@appTitle": {
+        "description": "The title of the application"
+    },
+    "cartPageTitle": "سلة المشتريات",
+    "@cartPageTitle": {
+        "description": "Title of the shopping cart page"
+    },
+    "checkoutButtonText": "الانتقال إلى الدفع",
+    "@checkoutButtonText": {
+        "description": "Text for the checkout button"
+    },
+    "addAddressTitle": "إضافة عنوان جديد",
+    "@addAddressTitle": {
+        "description": "Title of the add address page"
+    },
+    "selectLocation": "تحديد الموقع",
+    "@selectLocation": {
+        "description": "Text for selecting location"
+    },
+    "governorate": "المحافظة",
+    "@governorate": {
+        "description": "Label for governorate selection"
+    },
+    "addressDetails": "تفاصيل العنوان",
+    "@addressDetails": {
+        "description": "Label for address details"
+    },
+    "saveAddress": "حفظ العنوان",
+    "@saveAddress": {
+        "description": "Button text for saving address"
+    },
+    "settings": "الإعدادات",
+    "@settings": {
+        "description": "Settings section title"
+    },
+    "language": "اللغة",
+    "@language": {
+        "description": "Language selection title"
+    },
+    "theme": "الثيم",
+    "@theme": {
+        "description": "Theme selection title"
+    },
+    "lightTheme": "فاتح",
+    "@lightTheme": {
+        "description": "Light theme option"
+    },
+    "darkTheme": "داكن",
+    "@darkTheme": {
+        "description": "Dark theme option"
+    },
+    "systemTheme": "النظام",
+    "@systemTheme": {
+        "description": "System theme option"
+    },
+    "addresses": "العناوين المحفوظة",
+    "@addresses": {
+        "description": "Saved addresses section title"
+    },
+    "noAddresses": "لا توجد عناوين محفوظة",
+    "@noAddresses": {
+        "description": "Text shown when no addresses are saved"
+    },
+    "addNewAddress": "إضافة عنوان جديد",
+    "@addNewAddress": {
+        "description": "Button text for adding new address"
+    },
+    "editAddress": "تعديل العنوان",
+    "@editAddress": {
+        "description": "Edit address option"
+    },
+    "deleteAddress": "حذف العنوان",
+    "@deleteAddress": {
+        "description": "Delete address option"
+    },
+    "confirmDelete": "تأكيد الحذف",
+    "@confirmDelete": {
+        "description": "Confirmation dialog title for delete"
+    },
+    "deleteAddressConfirm": "هل أنت متأكد من حذف هذا العنوان؟",
+    "@deleteAddressConfirm": {
+        "description": "Confirmation message for address deletion"
+    },
+    "yes": "نعم",
+    "@yes": {
+        "description": "Yes button text"
+    },
+    "no": "لا",
+    "@no": {
+        "description": "No button text"
+    },
+    "cancel": "إلغاء",
+    "@cancel": {
+        "description": "Cancel button text"
+    }
+}

@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:store/models/cart_item_model.dart';
 import 'package:store/services/auth_service.dart';
 import 'package:store/services/cart_service.dart';
+import 'package:store/services/address_service.dart';
 import 'package:store/screens/checkout_page.dart';
 import 'package:store/screens/signup_page.dart';
+import 'package:store/screens/location_validation_page.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -39,19 +41,28 @@ class _CartPageState extends State<CartPage> {
     final bool isLoggedIn = await _authService.isLoggedIn();
     if (!mounted) return;
 
-    if (isLoggedIn) {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const CheckoutPage()));
-    } else {
+    if (!isLoggedIn) {
       final signupSuccess = await Navigator.push<bool>(
         context,
         MaterialPageRoute(builder: (context) => const SignUpPage()),
       );
-      if (signupSuccess == true) {
-        if (!mounted) return;
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const CheckoutPage()));
-      }
+      if (signupSuccess != true || !mounted) return;
+    }
+
+    // Check if user has a saved address
+    final addressService = AddressService();
+    final hasAddress = await addressService.hasAddress();
+
+    if (!mounted) return;
+
+    if (hasAddress) {
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const CheckoutPage()));
+    } else {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const LocationValidationPage()));
     }
   }
 
@@ -71,7 +82,8 @@ class _CartPageState extends State<CartPage> {
               !snapshot.hasData ||
               snapshot.data!.isEmpty) {
             return const Center(
-                child: Text('السلة فارغة حاليًا', style: TextStyle(fontSize: 18)));
+                child:
+                    Text('السلة فارغة حاليًا', style: TextStyle(fontSize: 18)));
           }
 
           final cartItems = snapshot.data!;
@@ -112,8 +124,8 @@ class _CartPageState extends State<CartPage> {
       ),
       elevation: 10,
       child: Padding(
-        padding: const EdgeInsets.all(16.0).copyWith(
-            bottom: MediaQuery.of(context).padding.bottom + 16),
+        padding: const EdgeInsets.all(16.0)
+            .copyWith(bottom: MediaQuery.of(context).padding.bottom + 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -147,7 +159,8 @@ class _CartPageState extends State<CartPage> {
                   elevation: 5,
                 ),
                 child: const Text('الانتقال إلى الدفع',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -156,7 +169,6 @@ class _CartPageState extends State<CartPage> {
     );
   }
 }
-
 
 // --- تم التعديل هنا: استخدام ListTile لجعلها متجاوبة ---
 class _CartItemCard extends StatelessWidget {
@@ -170,7 +182,8 @@ class _CartItemCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 4.0),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
         // `leading` لوضع الصورة على اليسار (أو اليمين في العربي)
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(8.0),

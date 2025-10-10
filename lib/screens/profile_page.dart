@@ -9,7 +9,9 @@ import 'package:store/screens/add_address_page.dart';
 import 'package:store/screens/login_page.dart';
 import 'package:store/screens/signup_page.dart';
 import 'package:store/services/auth_service.dart';
+import 'package:store/services/address_service.dart';
 import 'package:store/services/notification_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:store/theme.dart';
 
 // موديل لتنظيم بيانات صناديق الخدمات
@@ -17,7 +19,8 @@ class ServiceBoxModel {
   final String title;
   final IconData icon;
   final Color color;
-  ServiceBoxModel({required this.title, required this.icon, required this.color});
+  ServiceBoxModel(
+      {required this.title, required this.icon, required this.color});
 }
 
 class ProfilePage extends StatelessWidget {
@@ -28,16 +31,36 @@ class ProfilePage extends StatelessWidget {
     final authService = AuthService();
 
     final List<ServiceBoxModel> services = [
-      ServiceBoxModel(title: 'طلباتي', icon: Icons.shopping_bag_outlined, color: AppColors.primaryPink),
-      ServiceBoxModel(title: 'تتبع الشحنة', icon: Icons.local_shipping_outlined, color: AppColors.accentTeal),
-      ServiceBoxModel(title: 'المفضلة', icon: Icons.favorite_border, color: AppColors.accentYellow),
-      ServiceBoxModel(title: 'عناوين الفروع', icon: Icons.store_mall_directory_outlined, color: AppColors.accentPurple),
+      ServiceBoxModel(
+          title: 'طلباتي',
+          icon: Icons.shopping_bag_outlined,
+          color: AppColors.primaryPink),
+      ServiceBoxModel(
+          title: 'تتبع الشحنة',
+          icon: Icons.local_shipping_outlined,
+          color: AppColors.accentTeal),
+      ServiceBoxModel(
+          title: 'المفضلة',
+          icon: Icons.favorite_border,
+          color: AppColors.accentYellow),
+      ServiceBoxModel(
+          title: 'عناوين الفروع',
+          icon: Icons.store_mall_directory_outlined,
+          color: AppColors.accentPurple),
     ];
-    
+
     // قائمة عناوين مؤقتة (سيتم جلبها من Firestore في المستقبل)
     final List<AddressModel> userAddresses = [
-       AddressModel(id: '1', name: 'المنزل', details: 'حولي، قطعة 5، شارع 10، منزل 15'),
-       AddressModel(id: '2', name: 'العمل', details: 'مدينة الكويت، برج التجارية، الدور 20'),
+      AddressModel(
+          id: '1',
+          name: 'المنزل',
+          details: 'حولي، قطعة 5، شارع 10، منزل 15',
+          governorate: ''),
+      AddressModel(
+          id: '2',
+          name: 'العمل',
+          details: 'مدينة الكويت، برج التجارية، الدور 20',
+          governorate: ''),
     ];
 
     return Scaffold(
@@ -57,7 +80,8 @@ class ProfilePage extends StatelessWidget {
 
           return SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -66,14 +90,15 @@ class ProfilePage extends StatelessWidget {
                     _buildLoggedInUserInfo(context, user!, authService)
                   else
                     _buildGuestUserInfo(context),
-                  
+
                   const SizedBox(height: 16),
 
                   // --- باقي الأقسام تظهر للجميع ---
                   GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
@@ -86,12 +111,12 @@ class ProfilePage extends StatelessWidget {
                         title: service.title,
                         icon: service.icon,
                         color: service.color,
-                        onTap: () { /* TODO: Add navigation logic */ },
+                        onTap: () {/* TODO: Add navigation logic */},
                       );
                     },
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // قسم العناوين يظهر فقط للمستخدم المسجل
                   if (isLoggedIn) ...[
                     _buildSectionTitle('العناوين المحفوظة'),
@@ -106,7 +131,7 @@ class ProfilePage extends StatelessWidget {
                   _buildSectionTitle('الدعم والمساعدة'),
                   _buildSupportMenu(context),
                   const SizedBox(height: 32),
-                  
+
                   _buildSocialMediaLinks(),
                   const SizedBox(height: 20),
                 ],
@@ -119,7 +144,8 @@ class ProfilePage extends StatelessWidget {
   }
 
   // --- واجهة تظهر إذا كان المستخدم مسجل دخوله ---
-  Widget _buildLoggedInUserInfo(BuildContext context, User user, AuthService authService) {
+  Widget _buildLoggedInUserInfo(
+      BuildContext context, User user, AuthService authService) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -131,8 +157,12 @@ class ProfilePage extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundImage: user.photoURL != null ? NetworkImage(user.photoURL!) : null,
-                  child: user.photoURL == null ? const Icon(Icons.person, size: 30) : null,
+                  backgroundImage: user.photoURL != null
+                      ? NetworkImage(user.photoURL!)
+                      : null,
+                  child: user.photoURL == null
+                      ? const Icon(Icons.person, size: 30)
+                      : null,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -141,13 +171,15 @@ class ProfilePage extends StatelessWidget {
                     children: [
                       Text(
                         user.displayName ?? 'مرحباً بك',
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
                         overflow: TextOverflow.ellipsis,
                       ),
                       if (user.email != null)
                         Text(
                           user.email!,
-                          style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                          style: TextStyle(
+                              fontSize: 14, color: Colors.grey.shade600),
                           overflow: TextOverflow.ellipsis,
                         ),
                     ],
@@ -160,12 +192,14 @@ class ProfilePage extends StatelessWidget {
               width: double.infinity,
               child: TextButton.icon(
                 icon: const Icon(Icons.logout, color: Colors.red),
-                label: const Text('تسجيل الخروج', style: TextStyle(color: Colors.red)),
+                label: const Text('تسجيل الخروج',
+                    style: TextStyle(color: Colors.red)),
                 onPressed: () async {
                   await authService.signOut();
                 },
                 style: TextButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
               ),
             ),
@@ -185,29 +219,42 @@ class ProfilePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('أهلاً بك في متجرنا!', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineSmall),
+            Text('أهلاً بك في متجرنا!',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
-            Text('سجل الدخول لإدارة حسابك وتتبع طلباتك.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade600)),
+            Text('سجل الدخول لإدارة حسابك وتتبع طلباتك.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey.shade600)),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (c) => const LoginPage())),
-              style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+              onPressed: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (c) => const LoginPage())),
+              style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12)),
               child: const Text('تسجيل الدخول', style: TextStyle(fontSize: 16)),
             ),
             const SizedBox(height: 8),
             OutlinedButton(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (c) => const SignUpPage())),
-              style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
-              child: const Text('إنشاء حساب جديد', style: TextStyle(fontSize: 16)),
+              onPressed: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (c) => const SignUpPage())),
+              style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12)),
+              child:
+                  const Text('إنشاء حساب جديد', style: TextStyle(fontSize: 16)),
             ),
           ],
         ),
       ),
     );
   }
-  
+
   // (باقي الويدجتس تبقى كما هي بدون تغيير)
-  Widget _buildServiceBox({required String title, required IconData icon, required Color color, required VoidCallback onTap}) {
+  Widget _buildServiceBox(
+      {required String title,
+      required IconData icon,
+      required Color color,
+      required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -215,24 +262,33 @@ class ProfilePage extends StatelessWidget {
           color: color.withOpacity(0.15),
           borderRadius: BorderRadius.circular(15),
           border: Border.all(color: color, width: 1.5),
-          boxShadow: [BoxShadow(color: color.withOpacity(0.3), blurRadius: 8, spreadRadius: 0.5)],
+          boxShadow: [
+            BoxShadow(
+                color: color.withOpacity(0.3), blurRadius: 8, spreadRadius: 0.5)
+          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 40, color: color),
             const SizedBox(height: 12),
-            Text(title, style: TextStyle(color: color, fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(title,
+                style: TextStyle(
+                    color: color, fontSize: 18, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAddressesSection(BuildContext context, List<AddressModel> addresses) {
+  Widget _buildAddressesSection(
+      BuildContext context, List<AddressModel> addresses) {
+    final addressService = AddressService();
+
     return Column(
       children: [
-        if (addresses.isEmpty) const Text("لا توجد عناوين محفوظة."),
+        if (addresses.isEmpty)
+          const Text("لا توجد عناوين محفوظة.", style: TextStyle(fontSize: 16)),
         if (addresses.isNotEmpty)
           ListView.builder(
             shrinkWrap: true,
@@ -244,15 +300,103 @@ class ProfilePage extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 8),
                 child: ListTile(
                   leading: const Icon(Icons.home_work_outlined),
-                  title: Text(address.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text(address.details),
-                  trailing: PopupMenuButton<String>(
-                    onSelected: (value) {},
-                    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                      const PopupMenuItem<String>(value: 'edit', child: Text('تعديل')),
-                      const PopupMenuItem<String>(value: 'delete', child: Text('حذف')),
+                  title: Text(address.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(address.governorate),
+                      Text(address.details),
+                      if (address.latitude != null)
+                        Text(
+                            'Location: ${address.latitude!.toStringAsFixed(6)}, ${address.longitude!.toStringAsFixed(6)}'),
                     ],
                   ),
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (value) async {
+                      if (value == 'edit') {
+                        final result = await Navigator.push<bool>(
+                          context,
+                          MaterialPageRoute(
+                            builder: (c) => AddAddressPage(
+                              isRequired: false,
+                            ),
+                          ),
+                        );
+                        if (result == true) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('تم تحديث العنوان بنجاح')),
+                          );
+                        }
+                      } else if (value == 'delete') {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('تأكيد الحذف'),
+                            content:
+                                const Text('هل أنت متأكد من حذف هذا العنوان؟'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Text('إلغاء'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                child: const Text(
+                                  'حذف',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (confirm == true) {
+                          try {
+                            await addressService.deleteAddress(address.id);
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('تم حذف العنوان بنجاح')),
+                            );
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('حدث خطأ أثناء حذف العنوان'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
+                      }
+                    },
+                    itemBuilder: (BuildContext context) =>
+                        <PopupMenuEntry<String>>[
+                      const PopupMenuItem<String>(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit),
+                            SizedBox(width: 8),
+                            Text('تعديل'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete, color: Colors.red),
+                            SizedBox(width: 8),
+                            Text('حذف', style: TextStyle(color: Colors.red)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  isThreeLine: true,
                 ),
               );
             },
@@ -261,20 +405,36 @@ class ProfilePage extends StatelessWidget {
         OutlinedButton.icon(
           icon: const Icon(Icons.add),
           label: const Text('إضافة عنوان جديد'),
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (c) => const AddAddressPage())),
-          style: OutlinedButton.styleFrom(minimumSize: const Size(double.infinity, 40)),
+          onPressed: () async {
+            final result = await Navigator.push<bool>(
+              context,
+              MaterialPageRoute(
+                builder: (c) => const AddAddressPage(isRequired: false),
+              ),
+            );
+            if (result == true) {
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('تم إضافة العنوان بنجاح')),
+              );
+            }
+          },
+          style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 40)),
         )
       ],
     );
   }
-  
+
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
-      child: Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey)),
+      child: Text(title,
+          style: const TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey)),
     );
   }
-  
+
   Widget _buildSettingsMenu(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     final localeProvider = Provider.of<LocaleProvider>(context, listen: false);
@@ -287,7 +447,9 @@ class ProfilePage extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.language),
             title: const Text('اللغة'),
-            trailing: Text(localeProvider.locale.languageCode == 'ar' ? 'العربية' : 'English'),
+            trailing: Text(localeProvider.locale.languageCode == 'ar'
+                ? 'العربية'
+                : 'English'),
             onTap: () {
               showModalBottomSheet(
                 context: context,
@@ -326,21 +488,27 @@ class ProfilePage extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         RadioListTile<ThemeMode>(
-                          title: const Text('فاتح'), value: ThemeMode.light, groupValue: provider.themeMode,
+                          title: const Text('فاتح'),
+                          value: ThemeMode.light,
+                          groupValue: provider.themeMode,
                           onChanged: (value) {
                             if (value != null) provider.setThemeMode(value);
                             Navigator.of(context).pop();
                           },
                         ),
                         RadioListTile<ThemeMode>(
-                          title: const Text('داكن'), value: ThemeMode.dark, groupValue: provider.themeMode,
+                          title: const Text('داكن'),
+                          value: ThemeMode.dark,
+                          groupValue: provider.themeMode,
                           onChanged: (value) {
                             if (value != null) provider.setThemeMode(value);
                             Navigator.of(context).pop();
                           },
                         ),
                         RadioListTile<ThemeMode>(
-                          title: const Text('افتراضي للنظام'), value: ThemeMode.system, groupValue: provider.themeMode,
+                          title: const Text('افتراضي للنظام'),
+                          value: ThemeMode.system,
+                          groupValue: provider.themeMode,
                           onChanged: (value) {
                             if (value != null) provider.setThemeMode(value);
                             Navigator.of(context).pop();
@@ -371,8 +539,14 @@ class ProfilePage extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Column(
         children: [
-          ListTile(leading: const Icon(Icons.support_agent_outlined), title: const Text('تواصل مع خدمة العملاء'), onTap: () {}),
-          ListTile(leading: const Icon(Icons.help_outline), title: const Text('الأسئلة الشائعة'), onTap: () {}),
+          ListTile(
+              leading: const Icon(Icons.support_agent_outlined),
+              title: const Text('تواصل مع خدمة العملاء'),
+              onTap: () {}),
+          ListTile(
+              leading: const Icon(Icons.help_outline),
+              title: const Text('الأسئلة الشائعة'),
+              onTap: () {}),
         ],
       ),
     );
@@ -382,9 +556,13 @@ class ProfilePage extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        IconButton(onPressed: () {}, icon: const Icon(Icons.facebook, size: 30)),
-        IconButton(onPressed: () {}, icon: const Icon(Icons.camera_alt, size: 30)),
-        IconButton(onPressed: () {}, icon: const Icon(Icons.chat_bubble_outline, size: 30)),
+        IconButton(
+            onPressed: () {}, icon: const Icon(Icons.facebook, size: 30)),
+        IconButton(
+            onPressed: () {}, icon: const Icon(Icons.camera_alt, size: 30)),
+        IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.chat_bubble_outline, size: 30)),
       ],
     );
   }
