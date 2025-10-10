@@ -22,7 +22,7 @@ class _AddAddressPageState extends State<AddAddressPage> with SingleTickerProvid
 
   // متغيرات للخريطة
   final MapController _mapController = MapController();
-  LatLng _currentCenter = const LatLng(29.3759, 47.9774); // مركز الكويت
+  final LatLng _currentCenter = const LatLng(29.3759, 47.9774); // مركز الكويت
 
   @override
   void initState() {
@@ -64,7 +64,7 @@ class _AddAddressPageState extends State<AddAddressPage> with SingleTickerProvid
                 children: [
                   DropdownButtonFormField<String>(
                     decoration: const InputDecoration(labelText: 'المحافظة', border: OutlineInputBorder()),
-                    value: _selectedGovernorate,
+                    initialValue: _selectedGovernorate,
                     items: _kuwaitGovernorates.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
                     onChanged: (value) => setState(() => _selectedGovernorate = value),
                     validator: (value) => value == null ? 'اختر محافظة' : null,

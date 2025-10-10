@@ -1,11 +1,25 @@
 // In lib/auth_service.dart
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   static const String _isLoggedInKey = 'isLoggedIn';
   static const String _userNameKey = 'userName';
   static const String _userPhoneKey = 'userPhone';
+  
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  // Stream للاستماع لتغيرات حالة تسجيل الدخول في كل التطبيق
+  // هذا الـ Stream سيخبرنا فورًا عند تسجيل الدخول أو الخروج
+  Stream<User?> get authStateChanges => _auth.authStateChanges();
+
+  // جلب المستخدم الحالي
+  User? get currentUser => _auth.currentUser;
+
+  // تسجيل الخروج
+  Future<void> signOut() async {
+    await _auth.signOut();
+  }
   // التحقق مما إذا كان المستخدم قد سجل الدخول من قبل
   Future<bool> isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
