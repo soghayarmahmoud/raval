@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:store/providers/favorites_provider.dart';
 import 'package:store/providers/locale_provider.dart';
 import 'package:store/providers/theme_provider.dart';
+import 'package:store/providers/dynamic_text_provider.dart';
+import 'package:store/services/auth_service.dart';
 import 'package:store/screens/splash_screen.dart';
 import 'theme.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -23,7 +25,8 @@ void main() async {
         ChangeNotifierProvider(create: (context) => FavoritesProvider()),
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
         ChangeNotifierProvider(create: (context) => LocaleProvider()),
-
+        ChangeNotifierProvider(create: (context) => DynamicTextProvider()),
+        Provider(create: (context) => AuthService()),
       ],
       child: const MyApp(),
     ),
@@ -35,8 +38,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final themeProvider = Provider.of<ThemeProvider>(context);
+
+    final localeProvider = Provider.of<LocaleProvider>(context);
+    final dynamicTextProvider =
+        Provider.of<DynamicTextProvider>(context, listen: false);
+
+    // Initialize dynamic text with current locale
+    dynamicTextProvider.setLocale(localeProvider.locale.languageCode);
 
     return MaterialApp(
       title: 'Raval Kids Wears',
@@ -44,7 +53,7 @@ class MyApp extends StatelessWidget {
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: themeProvider.themeMode,
-      locale: const Locale('ar', ''),
+      locale: localeProvider.locale,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

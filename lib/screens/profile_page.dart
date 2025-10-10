@@ -5,14 +5,18 @@ import 'package:provider/provider.dart';
 import 'package:store/models/address_model.dart';
 import 'package:store/providers/locale_provider.dart';
 import 'package:store/providers/theme_provider.dart';
+import 'package:store/providers/dynamic_text_provider.dart';
 import 'package:store/screens/add_address_page.dart';
 import 'package:store/screens/login_page.dart';
 import 'package:store/screens/signup_page.dart';
+import 'package:store/screens/support_chat_page.dart';
+import 'package:store/screens/faq_page.dart';
 import 'package:store/services/auth_service.dart';
 import 'package:store/services/address_service.dart';
 import 'package:store/services/notification_service.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:store/theme.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 // موديل لتنظيم بيانات صناديق الخدمات
 class ServiceBoxModel {
@@ -25,6 +29,50 @@ class ServiceBoxModel {
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
+
+  Future<void> _handleGoogleSignIn(BuildContext context) async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return;
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await FirebaseAuth.instance.signInWithCredential(credential);
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to sign in with Google: $e')),
+      );
+    }
+  }
+
+  Future<void> _handleAppleSignIn(BuildContext context) async {
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      final oauthCredential = OAuthProvider('apple.com').credential(
+        idToken: credential.identityToken,
+        accessToken: credential.authorizationCode,
+      );
+
+      await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to sign in with Apple: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -211,6 +259,7 @@ class ProfilePage extends StatelessWidget {
 
   // --- واجهة تظهر للزائر (غير المسجل) ---
   Widget _buildGuestUserInfo(BuildContext context) {
+    final dynamicTextProvider = Provider.of<DynamicTextProvider>(context);
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -219,11 +268,11 @@ class ProfilePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('أهلاً بك في متجرنا!',
+            Text(dynamicTextProvider.getText('welcome'),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
-            Text('سجل الدخول لإدارة حسابك وتتبع طلباتك.',
+            Text(dynamicTextProvider.getText('loginPrompt'),
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey.shade600)),
             const SizedBox(height: 20),
@@ -232,7 +281,8 @@ class ProfilePage extends StatelessWidget {
                   MaterialPageRoute(builder: (c) => const LoginPage())),
               style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12)),
-              child: const Text('تسجيل الدخول', style: TextStyle(fontSize: 16)),
+              child: Text(dynamicTextProvider.getText('login'),
+                  style: const TextStyle(fontSize: 16)),
             ),
             const SizedBox(height: 8),
             OutlinedButton(
@@ -240,9 +290,24 @@ class ProfilePage extends StatelessWidget {
                   MaterialPageRoute(builder: (c) => const SignUpPage())),
               style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12)),
-              child:
-                  const Text('إنشاء حساب جديد', style: TextStyle(fontSize: 16)),
+              child: Text(dynamicTextProvider.getText('signup'),
+                  style: const TextStyle(fontSize: 16)),
             ),
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () => _handleGoogleSignIn(context),
+              icon: const Icon(Icons.g_mobiledata),
+              label: Text(dynamicTextProvider.getText('googleSignIn')),
+            ),
+            const SizedBox(height: 8),
+            if (Theme.of(context).platform == TargetPlatform.iOS)
+              ElevatedButton.icon(
+                onPressed: () => _handleAppleSignIn(context),
+                icon: const Icon(Icons.apple),
+                label: Text(dynamicTextProvider.getText('appleSignIn')),
+              ),
           ],
         ),
       ),
@@ -534,6 +599,7 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _buildSupportMenu(BuildContext context) {
+    final dynamicTextProvider = Provider.of<DynamicTextProvider>(context);
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -541,12 +607,24 @@ class ProfilePage extends StatelessWidget {
         children: [
           ListTile(
               leading: const Icon(Icons.support_agent_outlined),
-              title: const Text('تواصل مع خدمة العملاء'),
-              onTap: () {}),
+              title: Text(
+                  dynamicTextProvider.getText('supportChat') ?? 'Support Chat'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const SupportChatPage()),
+                );
+              }),
           ListTile(
               leading: const Icon(Icons.help_outline),
-              title: const Text('الأسئلة الشائعة'),
-              onTap: () {}),
+              title: Text(dynamicTextProvider.getText('faq') ?? 'FAQ'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FAQPage()),
+                );
+              }),
         ],
       ),
     );
@@ -566,4 +644,8 @@ class ProfilePage extends StatelessWidget {
       ],
     );
   }
+}
+
+extension on GoogleSignInAuthentication {
+  // String? get accessToken => null;
 }
