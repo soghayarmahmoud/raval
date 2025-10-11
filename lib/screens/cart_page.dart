@@ -1,5 +1,6 @@
 // In lib/screens/cart_page.dart
 import 'package:flutter/material.dart';
+import 'package:store/l10n/app_localizations.dart';
 import 'package:store/models/cart_item_model.dart';
 import 'package:store/services/auth_service.dart';
 import 'package:store/services/cart_service.dart';
@@ -68,9 +69,11 @@ class _CartPageState extends State<CartPage> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('سلة المشتريات'),
+        title: Text(loc.cartPageTitle),
       ),
       body: FutureBuilder<List<CartItemModel>>(
         future: _cartItemsFuture,
@@ -81,9 +84,9 @@ class _CartPageState extends State<CartPage> {
           if (snapshot.hasError ||
               !snapshot.hasData ||
               snapshot.data!.isEmpty) {
-            return const Center(
-                child:
-                    Text('السلة فارغة حاليًا', style: TextStyle(fontSize: 18)));
+            return Center(
+                child: Text(loc.noAddresses,
+                    style: const TextStyle(fontSize: 18)));
           }
 
           final cartItems = snapshot.data!;
@@ -107,7 +110,7 @@ class _CartPageState extends State<CartPage> {
                   },
                 ),
               ),
-              _buildCheckoutSection(totalPrice, cartItems.length),
+              _buildCheckoutSection(context, totalPrice, cartItems.length),
             ],
           );
         },
@@ -115,7 +118,9 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
-  Widget _buildCheckoutSection(double totalPrice, int totalItems) {
+  Widget _buildCheckoutSection(
+      BuildContext context, double totalPrice, int totalItems) {
+    final loc = AppLocalizations.of(context)!;
     return Card(
       margin: EdgeInsets.zero,
       shape: const RoundedRectangleBorder(
@@ -135,11 +140,14 @@ class _CartPageState extends State<CartPage> {
                 // --- تم التعديل هنا: استخدام Flexible ---
                 // هذا يسمح للنص بأن يأخذ المساحة المتاحة ويتجنب الأخطاء
                 Flexible(
-                  child: Text('الإجمالي ($totalItems منتجات)',
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey.shade600)),
+                  child: Text(
+                    //todo: '${loc.totalLabel} ($totalItems ${loc.products})',
+                    'products ($totalItems) price: ${totalPrice.toStringAsFixed(2)} EGP',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade600),
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Text('${totalPrice.toStringAsFixed(2)} EGP',
@@ -158,9 +166,9 @@ class _CartPageState extends State<CartPage> {
                       borderRadius: BorderRadius.circular(12)),
                   elevation: 5,
                 ),
-                child: const Text('الانتقال إلى الدفع',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                child: Text(loc.checkoutButtonText,
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold)),
               ),
             ),
           ],

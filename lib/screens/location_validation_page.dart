@@ -9,7 +9,7 @@ class LocationValidationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AddressService _addressService = AddressService();
+    final AddressService addressService = AddressService();
 
     return Scaffold(
       appBar: AppBar(
@@ -17,7 +17,7 @@ class LocationValidationPage extends StatelessWidget {
         automaticallyImplyLeading: false,
       ),
       body: FutureBuilder<List<AddressModel>>(
-        future: _addressService.getAddresses().first,
+        future: addressService.getAddresses().first,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

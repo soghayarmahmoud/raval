@@ -241,6 +241,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get cancel;
+
+  /// Add to cart button
+  ///
+  /// In en, this message translates to:
+  /// **'Add to cart'**
+  String get add_to_cart;
+
+  /// Snackbar shown when item added to cart
+  ///
+  /// In en, this message translates to:
+  /// **'Added to cart'**
+  String get added_to_cart;
+
+  /// Buy now button text
+  ///
+  /// In en, this message translates to:
+  /// **'Buy Now'**
+  String get buy_now;
+
+  /// Label for available colors
+  ///
+  /// In en, this message translates to:
+  /// **'Available colors'**
+  String get available_colors;
+
+  /// Label for available sizes
+  ///
+  /// In en, this message translates to:
+  /// **'Available sizes'**
+  String get available_sizes;
+
+  /// Label for product description
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get description;
+
+  /// Label for additional info
+  ///
+  /// In en, this message translates to:
+  /// **'Additional information'**
+  String get additional_info;
+
+  /// Label for quantity selector
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get quantity;
+
+  /// Login page title
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get login;
+
+  /// Signup text
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up'**
+  String get signup;
+
+  /// Email input hint
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get email_hint;
+
+  /// Password input hint
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password_hint;
+
+  /// Google sign in button
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get google_sign_in;
+
+  /// Apple sign in button
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Apple'**
+  String get apple_sign_in;
 }
 
 class _AppLocalizationsDelegate

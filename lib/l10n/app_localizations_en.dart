@@ -80,4 +80,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancel => 'Cancel';
+
+  @override
+  String get add_to_cart => 'Add to cart';
+
+  @override
+  String get added_to_cart => 'Added to cart';
+
+  @override
+  String get buy_now => 'Buy Now';
+
+  @override
+  String get available_colors => 'Available colors';
+
+  @override
+  String get available_sizes => 'Available sizes';
+
+  @override
+  String get description => 'Description';
+
+  @override
+  String get additional_info => 'Additional information';
+
+  @override
+  String get quantity => 'Quantity';
+
+  @override
+  String get login => 'Login';
+
+  @override
+  String get signup => 'Sign up';
+
+  @override
+  String get email_hint => 'Email';
+
+  @override
+  String get password_hint => 'Password';
+
+  @override
+  String get google_sign_in => 'Continue with Google';
+
+  @override
+  String get apple_sign_in => 'Continue with Apple';
 }

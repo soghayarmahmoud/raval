@@ -4,13 +4,18 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:store/models/address_model.dart';
 import 'package:store/providers/locale_provider.dart';
 import 'package:store/providers/theme_provider.dart';
 import 'package:store/providers/dynamic_text_provider.dart';
 import 'package:store/screens/add_address_page.dart';
+import 'package:store/screens/branches_page.dart';
+import 'package:store/screens/favorites_page.dart';
 import 'package:store/screens/login_page.dart';
+import 'package:store/screens/orders_page.dart';
+import 'package:store/screens/shipping_tracking_page.dart';
 import 'package:store/screens/signup_page.dart';
 import 'package:store/screens/support_chat_page.dart';
 import 'package:store/screens/faq_page.dart';
@@ -18,7 +23,6 @@ import 'package:store/services/auth_service.dart';
 import 'package:store/services/address_service.dart';
 import 'package:store/services/notification_service.dart';
 import 'package:store/theme.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 // موديل لتنظيم بيانات صناديق الخدمات
@@ -32,66 +36,71 @@ class ServiceBoxModel {
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
+
+  GoogleSignIn get _googleSignIn => GoogleSignIn.instance;
+
 // In lib/screens/profile_page.dart
 
 // ... (باقي الكود في ملفك كما هو)
 
-// // استخدم هذه الدالة النهائية بدلاً من أي نسخة قديمة
-// Future<void> _handleGoogleSignIn(BuildContext context) async {
-//   try {
-//     // الخطوة 1: اطلب من المستخدم تسجيل الدخول بحسابه في جوجل
-//     // هذا السطر يفتح نافذة جوجل المنبثقة للاختيار من بين الحسابات
-    
-//     final GoogleSignInAccount? googleUser = await GoogleSignIn.signIn();
+// استخدم هذه الدالة النهائية بدلاً من أي نسخة قديمة
+  Future<void> _handleGoogleSignIn(BuildContext context) async {
+    try {
+      // الخطوة 1: اطلب من المستخدم تسجيل الدخول بحسابه في جوجل
+      // هذا السطر يفتح نافذة جوجل المنبثقة للاختيار من بين الحسابات
 
-//     // الخطوة 2: تحقق مما إذا كان المستخدم قد ألغى العملية
-//     if (googleUser == null) {
-//       // ألغى المستخدم تسجيل الدخول، لا تفعل شيئًا
-//       print('Google Sign-In was canceled.');
-//       return;
-//     }
+      final GoogleSignInAccount? googleUser =
+          await _googleSignIn.authenticate();
 
-//     // الخطوة 3: احصل على توكنات المصادقة من جوجل بعد نجاح الدخول
-//     final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      // الخطوة 2: تحقق مما إذا كان المستخدم قد ألغى العملية
+      if (googleUser == null) {
+        // ألغى المستخدم تسجيل الدخول، لا تفعل شيئًا
+        print('Google Sign-In was canceled.');
+        return;
+      }
 
-//     // الخطوة 4: تأكد من أن التوكنات ليست فارغة (خطوة أمان إضافية)
-//     if (googleAuth.idToken == null || googleAuth.idToken == null) {
-//       throw 'Missing Google Auth Tokens';
-//     }
+      // الخطوة 3: احصل على توكنات المصادقة من جوجل بعد نجاح الدخول
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
-//     // الخطوة 5: أنشئ "بيانات اعتماد" خاصة بـ Firebase باستخدام التوكنات
-//     final credential = GoogleAuthProvider.credential(
-//       accessToken: googleAuth.idToken,
-//       idToken: googleAuth.idToken,
-//     );
+      // الخطوة 4: تأكد من أن التوكنات ليست فارغة (خطوة أمان إضافية)
+      if (googleAuth.idToken == null || googleAuth.idToken == null) {
+        throw 'Missing Google Auth Tokens';
+      }
 
-//     // الخطوة 6: استخدم بيانات الاعتماد لتسجيل الدخول فعليًا في Firebase
-//     final userCredential =
-//         await FirebaseAuth.instance.signInWithCredential(credential);
+      // الخطوة 5: أنشئ "بيانات اعتماد" خاصة بـ Firebase باستخدام التوكنات
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.idToken,
+        idToken: googleAuth.idToken,
+      );
 
-//     // الخطوة 7: أظهر رسالة نجاح (مع التأكد من أن الصفحة ما زالت معروضة)
-//     if (!context.mounted) return;
+      // الخطوة 6: استخدم بيانات الاعتماد لتسجيل الدخول فعليًا في Firebase
+      final userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
 
-//     if (userCredential.user != null) {
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         const SnackBar(
-//           content: Text('تم تسجيل الدخول بنجاح باستخدام جوجل'),
-//           backgroundColor: Colors.green,
-//         ),
-//       );
-//     }
-//   } catch (e) {
-//     // في حالة حدوث أي خطأ، اطبعه وأظهر رسالة للمستخدم
-//     print('Error during Google Sign-In: $e');
-//     if (!context.mounted) return;
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       SnackBar(
-//         content: Text('فشل تسجيل الدخول: ${e.toString()}'),
-//         backgroundColor: Colors.red,
-//       ),
-//     );
-//   }
-// }
+      // الخطوة 7: أظهر رسالة نجاح (مع التأكد من أن الصفحة ما زالت معروضة)
+      if (!context.mounted) return;
+
+      if (userCredential.user != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('تم تسجيل الدخول بنجاح باستخدام جوجل'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      // في حالة حدوث أي خطأ، اطبعه وأظهر رسالة للمستخدم
+      print('Error during Google Sign-In: $e');
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('فشل تسجيل الدخول: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
 // ... (باقي الكود في ملفك كما هو)
 
@@ -155,18 +164,7 @@ class ProfilePage extends StatelessWidget {
     ];
 
     // قائمة عناوين مؤقتة (سيتم جلبها من Firestore في المستقبل)
-    final List<AddressModel> userAddresses = [
-      AddressModel(
-          id: '1',
-          name: 'المنزل',
-          details: 'حولي، قطعة 5، شارع 10، منزل 15',
-          governorate: 'حولي'),
-      AddressModel(
-          id: '2',
-          name: 'العمل',
-          details: 'مدينة الكويت، برج التجارية، الدور 20',
-          governorate: 'العاصمة'),
-    ];
+    final List<AddressModel> userAddresses = [];
 
     return Scaffold(
       appBar: AppBar(
@@ -216,7 +214,22 @@ class ProfilePage extends StatelessWidget {
                         title: service.title,
                         icon: service.icon,
                         color: service.color,
-                        onTap: () {/* TODO: Add navigation logic */},
+                        onTap: () {
+                          switch (index) {
+                            case 0: // Orders
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => OrdersPage()));
+                              break;
+                            case 1: // Shipping
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => ShippingTrackingPage()));
+                              break;
+                            case 2: // Favorites
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => FavoritesPage()));
+                              break;
+                            case 3: // Branches
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => BranchesPage()));
+                              break;
+                          }
+                        },
                       );
                     },
                   ),
@@ -354,7 +367,7 @@ class ProfilePage extends StatelessWidget {
             const Divider(),
             const SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: () =>{} /*_handleGoogleSignIn(context)*/,
+              onPressed: () => {} /*_handleGoogleSignIn(context)*/,
               icon: const Icon(Icons.g_mobiledata), // يمكنك تغيير الأيقونة
               label: Text(dynamicTextProvider.getText('googleSignIn')),
             ),
@@ -370,7 +383,7 @@ class ProfilePage extends StatelessWidget {
       ),
     );
   }
-  
+
   // (باقي الويدجتس تبقى كما هي)
   Widget _buildServiceBox(
       {required String title,
@@ -457,12 +470,11 @@ class ProfilePage extends StatelessWidget {
                           context: context,
                           builder: (context) => AlertDialog(
                             title: const Text('تأكيد الحذف'),
-                            content: const Text(
-                                'هل أنت متأكد من حذف هذا العنوان؟'),
+                            content:
+                                const Text('هل أنت متأكد من حذف هذا العنوان؟'),
                             actions: [
                               TextButton(
-                                onPressed: () =>
-                                    Navigator.pop(context, false),
+                                onPressed: () => Navigator.pop(context, false),
                                 child: const Text('إلغاء'),
                               ),
                               TextButton(
@@ -488,8 +500,7 @@ class ProfilePage extends StatelessWidget {
                             if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content:
-                                    Text('حدث خطأ أثناء حذف العنوان'),
+                                content: Text('حدث خطأ أثناء حذف العنوان'),
                                 backgroundColor: Colors.red,
                               ),
                             );
@@ -666,8 +677,7 @@ class ProfilePage extends StatelessWidget {
         children: [
           ListTile(
               leading: const Icon(Icons.support_agent_outlined),
-              title: Text(
-                  dynamicTextProvider.getText('supportChat')),
+              title: Text(dynamicTextProvider.getText('supportChat')),
               onTap: () {
                 Navigator.push(
                   context,
@@ -704,4 +714,3 @@ class ProfilePage extends StatelessWidget {
     );
   }
 }
-

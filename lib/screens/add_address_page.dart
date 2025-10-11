@@ -191,7 +191,7 @@ class _AddAddressPageState extends State<AddAddressPage>
                               labelText: 'المحافظة',
                               border: OutlineInputBorder(),
                             ),
-                            value: _selectedGovernorate,
+                            initialValue: _selectedGovernorate,
                             items: _kuwaitGovernorates
                                 .map((e) =>
                                     DropdownMenuItem(value: e, child: Text(e)))

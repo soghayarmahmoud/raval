@@ -53,7 +53,7 @@ class FAQService {
         .get();
     
     // Add results from translations if not already found
-    translationResults.docs.forEach((doc) {
+    for (var doc in translationResults.docs) {
       var faq = FAQModel.fromFirestore(doc);
       if (!faqs.any((f) => f.id == faq.id)) {
         bool foundInTranslations = false;
@@ -67,7 +67,7 @@ class FAQService {
           faqs.add(faq);
         }
       }
-    });
+    }
 
     return faqs;
   }

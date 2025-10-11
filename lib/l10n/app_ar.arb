@@ -1,4 +1,5 @@
 {
+    "@@locale": "ar",
     "appTitle": "متجرنا",
     "@appTitle": {
         "description": "The title of the application"
@@ -95,4 +96,33 @@
     "@cancel": {
         "description": "Cancel button text"
     }
+    ,
+    "add_to_cart": "أضف إلى السلة",
+    "@add_to_cart": { "description": "Add to cart button" },
+    "added_to_cart": "تمت الإضافة إلى السلة",
+    "@added_to_cart": { "description": "Snackbar shown when item added to cart" },
+    "buy_now": "شراء الآن",
+    "@buy_now": { "description": "Buy now button text" },
+    "available_colors": "الألوان المتاحة",
+    "@available_colors": { "description": "Label for available colors" },
+    "available_sizes": "المقاسات المتاحة",
+    "@available_sizes": { "description": "Label for available sizes" },
+    "description": "الوصف",
+    "@description": { "description": "Label for product description" },
+    "additional_info": "معلومات إضافية",
+    "@additional_info": { "description": "Label for additional info" },
+    "quantity": "الكمية",
+    "@quantity": { "description": "Label for quantity selector" },
+    "login": "تسجيل الدخول",
+    "@login": { "description": "Login page title" },
+    "signup": "إنشاء حساب",
+    "@signup": { "description": "Signup text" },
+    "email_hint": "البريد الإلكتروني",
+    "@email_hint": { "description": "Email input hint" },
+    "password_hint": "كلمة السر",
+    "@password_hint": { "description": "Password input hint" },
+    "google_sign_in": "المتابعة باستخدام Google",
+    "@google_sign_in": { "description": "Google sign in button" },
+    "apple_sign_in": "المتابعة باستخدام Apple",
+    "@apple_sign_in": { "description": "Apple sign in button" }
 }

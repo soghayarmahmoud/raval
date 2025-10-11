@@ -44,7 +44,7 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
 
     // Initialize MyFatoorah - Add your API token later
     MyFatoorahFlutter.instance.init(
-      'YOUR_MYFATOORAH_API_TOKEN_HERE', // TODO: Replace with your actual API token
+      'rLtt6JWvbU-wNJBlEK-BB_gSAc_wL-dQzVsq7MCTeP1_kaLFeJB0bA92G5NioM7qrONj5bTksLmafbq0A0LIKcwU_fL4a1gSt4dYFVVPVGP-CMAaGb6d3o8G4C6mMuiQz0jAZ7LDEF_rI9y9VlkCliH3PJj_9go_N_1ISGpmbu5Cdx_ug0WxE_26z21upG2_N0G_p4B2DRTAcc_Gk7GDU6_pL8gJzVp9p4VlL8N1jMAA-g6_2rE1s3a_b3y3a_p', // TODO: Replace with your actual API token
       MFCountry.KUWAIT,
       MFEnvironment.TEST,
     );

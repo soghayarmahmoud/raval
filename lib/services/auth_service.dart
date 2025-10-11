@@ -18,6 +18,23 @@ class AuthService {
   // Get the current user
   User? get currentUser => _auth.currentUser;
 
+  // Verify password strength
+  String? validatePassword(String password) {
+    if (password.length < 6) {
+      return 'weak-password';
+    }
+    return null;
+  }
+
+  // Verify email format
+  String? validateEmail(String email) {
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      return 'invalid-email';
+    }
+    return null;
+  }
+
   // Complete sign-out from the app
   Future<void> signOut() async {
     try {
@@ -38,6 +55,10 @@ class AuthService {
 
   // Check if the user was previously logged in (via local data)
   Future<bool> isLoggedIn() async {
+    // Prefer server-side auth state when available
+    final user = _auth.currentUser;
+    if (user != null) return true;
+
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_isLoggedInKey) ?? false;
   }
@@ -56,4 +77,3 @@ class AuthService {
     return prefs.getString(_userNameKey);
   }
 }
-

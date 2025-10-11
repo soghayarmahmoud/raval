@@ -1,4 +1,3 @@
-// In lib/screens/search_page.dart
 import 'package:flutter/material.dart';
 import 'package:store/models/product_model.dart';
 import 'package:store/screens/home_page.dart';
@@ -91,7 +90,6 @@ class _SearchPageState extends State<SearchPage> {
       Navigator.of(context).pop();
   }
 
-  // --- تم التعديل على هذه الدالة لجعلها متجاوبة ---
   void _showFilterSheet() {
     showModalBottomSheet(
       context: context,
@@ -104,20 +102,18 @@ class _SearchPageState extends State<SearchPage> {
           builder: (BuildContext context, StateSetter setSheetState) {
             return DraggableScrollableSheet(
               expand: false,
-              initialChildSize: 0.7, // زدنا الحجم المبدئي قليلاً
+              initialChildSize: 0.7,
               maxChildSize: 0.9,
               builder: (_, scrollController) {
-                // --- ابدأ التعديل الرئيسي هنا ---
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
                   child: Column(
                     children: [
                       Text('الفلاتر', style: Theme.of(context).textTheme.headlineSmall),
                       const Divider(height: 24),
-                      // المحتوى القابل للتمرير
                       Expanded(
-                        child: ListView( // استخدمنا ListView لجعل المحتوى قابل للتمرير
-                          controller: scrollController, // <-- ربطنا الـ controller هنا
+                        child: ListView( 
+                          controller: scrollController, 
                           children: [
                             Text('السعر (EGP)', style: Theme.of(context).textTheme.titleLarge),
                             RangeSlider(
@@ -165,7 +161,6 @@ class _SearchPageState extends State<SearchPage> {
                           ],
                         ),
                       ),
-                      // الأزرار ثابتة في الأسفل
                       const SizedBox(height: 12),
                       Row(
                         children: [
@@ -180,7 +175,6 @@ class _SearchPageState extends State<SearchPage> {
                     ],
                   ),
                 );
-                // --- نهاية التعديل الرئيسي ---
               },
             );
           },

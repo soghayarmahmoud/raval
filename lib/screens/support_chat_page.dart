@@ -30,8 +30,9 @@ class _SupportChatPageState extends State<SupportChatPage> {
   }
 
   Future<void> _sendMessage() async {
-    if (_messageController.text.trim().isEmpty || _currentTicket == null)
+    if (_messageController.text.trim().isEmpty || _currentTicket == null) {
       return;
+    }
 
     setState(() => _isSending = true);
     try {

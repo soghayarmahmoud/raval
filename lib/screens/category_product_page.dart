@@ -20,12 +20,10 @@ class CategoryProductsPage extends StatefulWidget {
 class _CategoryProductsPageState extends State<CategoryProductsPage> {
   late List<ProductModel> _filteredProducts;
 
-  // متغيرات لحفظ قيم الفلاتر المختارة
   RangeValues _priceRange = const RangeValues(0, 1000);
   List<String> _selectedColors = [];
   List<String> _selectedSizes = [];
 
-  // قوائم بالخيارات المتاحة للفلترة (يمكنك جلبها ديناميكيًا من المنتجات)
   final List<String> _availableColors = ['وردي', 'أبيض', 'أزرق', 'أسود', 'أخضر'];
   final List<String> _availableSizes = ['S', 'M', 'L', 'XL'];
 
@@ -33,14 +31,12 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
   @override
   void initState() {
     super.initState();
-    // في البداية، كل المنتجات معروضة
     _filteredProducts = widget.products;
   }
 
   void _applyFilters() {
     List<ProductModel> tempProducts = widget.products;
 
-    // 1. الفلترة بالسعر
     tempProducts = tempProducts.where((p) {
       return p.price >= _priceRange.start && p.price <= _priceRange.end;
     }).toList();
@@ -85,7 +81,6 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        // نستخدم StatefulBuilder للحفاظ على حالة الفلاتر داخل النافذة
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setSheetState) {
             return DraggableScrollableSheet(
@@ -115,7 +110,6 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
 
                     const SizedBox(height: 24),
 
-                    // فلتر اللون
                     Text('اللون', style: Theme.of(context).textTheme.titleLarge),
                     Wrap(
                       spacing: 8.0,
@@ -139,7 +133,6 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
 
                      const SizedBox(height: 24),
 
-                    // فلتر المقاس
                     Text('المقاس', style: Theme.of(context).textTheme.titleLarge),
                     Wrap(
                       spacing: 8.0,
@@ -195,15 +188,13 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
           : GridView.builder(
               padding: const EdgeInsets.all(12.0),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // عرض منتجين في كل صف
-                childAspectRatio: 0.65, // تعديل نسبة الطول للعرض
+                crossAxisCount: 2, 
+                childAspectRatio: 0.65, 
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
               ),
               itemCount: _filteredProducts.length,
               itemBuilder: (context, index) {
-                // نستخدم ProductCard الموجودة في home_page.dart
-                // ستحتاج لتعديل بسيط عليها لتناسب هذا السياق أو إنشاء ويدجت جديدة
                 return ProductCard(
                   product: _filteredProducts[index],
                   onCardTap: () { /* Navigate to detail page */ },

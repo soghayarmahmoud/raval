@@ -96,4 +96,33 @@
     "@cancel": {
         "description": "Cancel button text"
     }
+    ,
+    "add_to_cart": "Add to cart",
+    "@add_to_cart": { "description": "Add to cart button" },
+    "added_to_cart": "Added to cart",
+    "@added_to_cart": { "description": "Snackbar shown when item added to cart" },
+    "buy_now": "Buy Now",
+    "@buy_now": { "description": "Buy now button text" },
+    "available_colors": "Available colors",
+    "@available_colors": { "description": "Label for available colors" },
+    "available_sizes": "Available sizes",
+    "@available_sizes": { "description": "Label for available sizes" },
+    "description": "Description",
+    "@description": { "description": "Label for product description" },
+    "additional_info": "Additional information",
+    "@additional_info": { "description": "Label for additional info" },
+    "quantity": "Quantity",
+    "@quantity": { "description": "Label for quantity selector" },
+    "login": "Login",
+    "@login": { "description": "Login page title" },
+    "signup": "Sign up",
+    "@signup": { "description": "Signup text" },
+    "email_hint": "Email",
+    "@email_hint": { "description": "Email input hint" },
+    "password_hint": "Password",
+    "@password_hint": { "description": "Password input hint" },
+    "google_sign_in": "Continue with Google",
+    "@google_sign_in": { "description": "Google sign in button" },
+    "apple_sign_in": "Continue with Apple",
+    "@apple_sign_in": { "description": "Apple sign in button" }
 }

@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:store/providers/favorites_provider.dart';
-import 'package:store/providers/dynamic_text_provider.dart';
-
-import 'package:store/services/cart_service.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:photo_view/photo_view.dart';
+
 import 'package:store/models/product_model.dart';
+import 'package:store/providers/favorites_provider.dart';
+import 'package:store/providers/dynamic_text_provider.dart';
+import 'package:store/services/cart_service.dart';
+import 'package:store/services/auth_service.dart';
+import 'package:store/screens/login_page.dart';
+import 'package:store/screens/location_validation_page.dart';
+import 'package:store/screens/cart_page.dart';
+import 'package:store/screens/checkout_page.dart';
+import 'package:store/l10n/app_localizations.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final ProductModel product;
@@ -20,7 +26,6 @@ class ProductDetailPage extends StatefulWidget {
 class _ProductDetailPageState extends State<ProductDetailPage>
     with SingleTickerProviderStateMixin {
   final CartService _cartService = CartService();
-  final CarouselSliderController _carouselController = CarouselSliderController();
   late final AnimationController _slideController;
   int _currentImageIndex = 0;
   int _quantity = 1;
@@ -71,12 +76,66 @@ class _ProductDetailPageState extends State<ProductDetailPage>
     );
   }
 
+  Future<void> _buyNowFlow(BuildContext context) async {
+    final authService = AuthService();
+    var isLoggedIn = await authService.isLoggedIn();
+    if (!isLoggedIn) {
+      final result = await Navigator.push<bool>(
+        context,
+        MaterialPageRoute(builder: (c) => const LoginPage()),
+      );
+      isLoggedIn = result == true;
+    }
+
+    if (!isLoggedIn) return;
+
+    final chooseResult = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (c) => const LocationValidationPage()),
+    );
+
+    if (chooseResult == true) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (c) => const CheckoutPage()),
+      );
+    }
+  }
+
+  String _textOrLoc(
+      DynamicTextProvider dynamicTextProvider, String key, String locValue) {
+    try {
+      final txt = dynamicTextProvider.getText(key);
+      if (txt.isNotEmpty) return txt;
+      return locValue;
+    } catch (_) {
+      return locValue;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final favoritesProvider = Provider.of<FavoritesProvider>(context);
     final dynamicTextProvider = Provider.of<DynamicTextProvider>(context);
     final isFavorite = favoritesProvider.isFavorite(widget.product);
     final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context)!;
+
+    final availableColorsLabel = _textOrLoc(
+        dynamicTextProvider, 'available_colors', loc.available_colors);
+    final availableSizesLabel =
+        _textOrLoc(dynamicTextProvider, 'available_sizes', loc.available_sizes);
+    final quantityLabel =
+        _textOrLoc(dynamicTextProvider, 'quantity', loc.quantity);
+    final descriptionLabel =
+        _textOrLoc(dynamicTextProvider, 'description', loc.description);
+    final additionalInfoLabel =
+        _textOrLoc(dynamicTextProvider, 'additional_info', loc.additional_info);
+    final addToCartLabel =
+        _textOrLoc(dynamicTextProvider, 'add_to_cart', loc.add_to_cart);
+    final addedToCartLabel =
+        _textOrLoc(dynamicTextProvider, 'added_to_cart', loc.added_to_cart);
+    final buyNowLabel = _textOrLoc(dynamicTextProvider, 'buy_now', loc.buy_now);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -86,11 +145,21 @@ class _ProductDetailPageState extends State<ProductDetailPage>
             expandedHeight: 400,
             pinned: true,
             backgroundColor: theme.scaffoldBackgroundColor,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.shopping_cart_outlined),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CartPage()),
+                  );
+                },
+              ),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 children: [
                   CarouselSlider(
-                    carouselController: _carouselController,
                     options: CarouselOptions(
                       height: double.infinity,
                       viewportFraction: 1,
@@ -123,8 +192,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                       children:
                           widget.product.images.asMap().entries.map((entry) {
                         return GestureDetector(
-                          onTap: () =>
-                              _carouselController.jumpToPage(entry.key),
+                          onTap: () {},
                           child: Container(
                             width: 8,
                             height: 8,
@@ -132,8 +200,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: theme.primaryColor.withOpacity(
-                                _currentImageIndex == entry.key ? 1 : 0.4,
-                              ),
+                                  _currentImageIndex == entry.key ? 1 : 0.4),
                             ),
                           ),
                         );
@@ -174,7 +241,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '\$${widget.product.price.toStringAsFixed(2)}',
+                    '${widget.product.price.toStringAsFixed(2)} EGP',
                     style: TextStyle(
                       fontSize: 24,
                       color: theme.primaryColor,
@@ -184,7 +251,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   const SizedBox(height: 24),
                   if (widget.product.availableColors.isNotEmpty) ...[
                     Text(
-                      dynamicTextProvider.getText('available_colors'),
+                      availableColorsLabel,
                       style: theme.textTheme.titleMedium,
                     ),
                     const SizedBox(height: 12),
@@ -196,6 +263,12 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                         itemBuilder: (context, index) {
                           final color = widget.product.availableColors[index];
                           final isSelected = color == _selectedColor;
+                          Color parsed;
+                          try {
+                            parsed = Color(int.parse('0xFF$color'));
+                          } catch (_) {
+                            parsed = Colors.grey;
+                          }
                           return Padding(
                             padding: const EdgeInsets.only(right: 8),
                             child: GestureDetector(
@@ -203,7 +276,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                                   setState(() => _selectedColor = color),
                               child: CircleAvatar(
                                 radius: 25,
-                                backgroundColor: Color(int.parse('0xFF$color')),
+                                backgroundColor: parsed,
                                 child: isSelected
                                     ? const Icon(Icons.check,
                                         color: Colors.white)
@@ -218,7 +291,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ],
                   if (widget.product.availableSizes.isNotEmpty) ...[
                     Text(
-                      dynamicTextProvider.getText('available_sizes'),
+                      availableSizesLabel,
                       style: theme.textTheme.titleMedium,
                     ),
                     const SizedBox(height: 12),
@@ -240,7 +313,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                     const SizedBox(height: 24),
                   ],
                   Text(
-                    dynamicTextProvider.getText('quantity'),
+                    quantityLabel,
                     style: theme.textTheme.titleMedium,
                   ),
                   const SizedBox(height: 12),
@@ -278,7 +351,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    dynamicTextProvider.getText('description'),
+                    descriptionLabel,
                     style: theme.textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
@@ -289,7 +362,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   const SizedBox(height: 24),
                   if (widget.product.additionalInfo.isNotEmpty) ...[
                     Text(
-                      dynamicTextProvider.getText('additional_info'),
+                      additionalInfoLabel,
                       style: theme.textTheme.titleMedium,
                     ),
                     const SizedBox(height: 8),
@@ -308,7 +381,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                           ],
                         ),
                       );
-                    }).toList(),
+                    }),
                   ],
                 ],
               ),
@@ -336,19 +409,25 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   _cartService.addToCart(widget.product, _quantity);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(
-                        dynamicTextProvider.getText('added_to_cart'),
-                      ),
+                      content: Text(addedToCartLabel),
                     ),
                   );
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: Text(dynamicTextProvider.getText('add_to_cart')),
+                child: Text(addToCartLabel),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
+            SizedBox(
+              width: 140,
+              child: OutlinedButton(
+                onPressed: () => _buyNowFlow(context),
+                child: Text(buyNowLabel),
+              ),
+            ),
+            const SizedBox(width: 8),
             IconButton(
               onPressed: () {
                 favoritesProvider.toggleFavorite(widget.product);
@@ -360,7 +439,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
             ),
             IconButton(
               onPressed: () {
-                // Share product logic
+                // Share product logic (left as-is)
               },
               icon: const Icon(Icons.share),
             ),

@@ -16,7 +16,7 @@ class _FAQPageState extends State<FAQPage> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   String? _selectedCategory;
-  List<String> _categories = [
+  final List<String> _categories = [
     'general',
     'orders',
     'shipping',
@@ -85,7 +85,7 @@ class _FAQPageState extends State<FAQPage> {
                             },
                           ),
                         );
-                      }).toList(),
+                      }),
                     ],
                   ),
                 ),
@@ -93,87 +93,42 @@ class _FAQPageState extends State<FAQPage> {
             ),
           ),
           Expanded(
-            child: StreamBuilder<List<FAQModel>>(
-              stream: _selectedCategory != null
-                  ? _faqService.getFAQsByCategory(_selectedCategory!)
-                  : _faqService.getFAQs(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.error_outline,
-                            size: 48, color: Colors.red),
-                        const SizedBox(height: 16),
-                        const Text('حدث خطأ في تحميل الأسئلة الشائعة'),
-                        TextButton(
-                          onPressed: () {
-                            setState(() {});
-                          },
-                          child: const Text('إعادة المحاولة'),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                final faqs = snapshot.data ?? [];
-                final filteredFaqs = _searchQuery.isEmpty
-                    ? faqs
-                    : faqs.where((faq) {
-                        final question =
-                            faq.getQuestion(locale.languageCode).toLowerCase();
-                        final answer =
-                            faq.getAnswer(locale.languageCode).toLowerCase();
-                        final query = _searchQuery.toLowerCase();
-                        return question.contains(query) ||
-                            answer.contains(query);
-                      }).toList();
-
-                if (filteredFaqs.isEmpty) {
-                  return const Center(
-                    child: Text('لا توجد نتائج'),
-                  );
-                }
-
-                return ListView.builder(
-                  itemCount: filteredFaqs.length,
-                  padding: const EdgeInsets.all(16),
-                  itemBuilder: (context, index) {
-                    final faq = filteredFaqs[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      child: ExpansionTile(
-                        title: Text(
-                          faq.getQuestion(locale.languageCode),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Text(
-                              faq.getAnswer(locale.languageCode),
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge
-                                    ?.color,
-                                height: 1.5,
-                              ),
-                            ),
-                          ),
-                        ],
+            child: ListView.builder(
+              itemCount: 5, // Display 5 mock FAQs
+              padding: const EdgeInsets.all(16),
+              itemBuilder: (context, index) {
+                final faq = FAQModel(
+                  id: 'mock-$index',
+                  question: 'Mock Question $index?',
+                  answer:
+                      'This is a mock answer for question $index. It provides details and solutions related to the question.',
+                  order: index,
+                  category: 'general',
+                  translations: {},
+                );
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  child: ExpansionTile(
+                    title: Text(
+                      faq.getQuestion(locale.languageCode),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
                       ),
-                    );
-                  },
+                    ),
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          faq.getAnswer(locale.languageCode),
+                          style: TextStyle(
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               },
             ),

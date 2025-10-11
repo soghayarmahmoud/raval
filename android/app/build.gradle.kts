@@ -22,7 +22,8 @@ android {
 
     defaultConfig {
         // هنا يجب استخدام minSdk وليس minSdkVersion
-        minSdk = flutter.minSdkVersion 
+// ✅ Correct Line (Kotlin Style)
+    minSdkVersion(26)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

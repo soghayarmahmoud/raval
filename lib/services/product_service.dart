@@ -22,7 +22,7 @@ class ProductService {
         .snapshots()
         .map((snapshot) {
       return snapshot.docs
-          .map((doc) => ProductModel.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => ProductModel.fromJson(doc.data()))
           .toList();
     });
   }
@@ -31,7 +31,7 @@ class ProductService {
   Stream<List<ProductModel>> getAllProducts() {
     return _firestore.collection(_collection).snapshots().map((snapshot) {
       return snapshot.docs
-          .map((doc) => ProductModel.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => ProductModel.fromJson(doc.data()))
           .toList();
     });
   }
@@ -42,7 +42,7 @@ class ProductService {
     query = query.toLowerCase();
     return _firestore.collection(_collection).snapshots().map((snapshot) {
       return snapshot.docs
-          .map((doc) => ProductModel.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => ProductModel.fromJson(doc.data()))
           .where((product) {
         return product.name.toLowerCase().contains(query) ||
             product.description.toLowerCase().contains(query) ||
@@ -60,7 +60,7 @@ class ProductService {
         .snapshots()
         .map((snapshot) {
       return snapshot.docs
-          .map((doc) => ProductModel.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => ProductModel.fromJson(doc.data()))
           .toList();
     });
   }
@@ -74,7 +74,7 @@ class ProductService {
         .snapshots()
         .map((snapshot) {
       return snapshot.docs
-          .map((doc) => ProductModel.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => ProductModel.fromJson(doc.data()))
           .toList();
     });
   }
@@ -90,7 +90,7 @@ class ProductService {
         .snapshots()
         .map((snapshot) {
       return snapshot.docs
-          .map((doc) => ProductModel.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => ProductModel.fromJson(doc.data()))
           .toList();
     });
   }

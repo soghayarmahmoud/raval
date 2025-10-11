@@ -79,4 +79,46 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cancel => 'إلغاء';
+
+  @override
+  String get add_to_cart => 'أضف إلى السلة';
+
+  @override
+  String get added_to_cart => 'تمت الإضافة إلى السلة';
+
+  @override
+  String get buy_now => 'شراء الآن';
+
+  @override
+  String get available_colors => 'الألوان المتاحة';
+
+  @override
+  String get available_sizes => 'المقاسات المتاحة';
+
+  @override
+  String get description => 'الوصف';
+
+  @override
+  String get additional_info => 'معلومات إضافية';
+
+  @override
+  String get quantity => 'الكمية';
+
+  @override
+  String get login => 'تسجيل الدخول';
+
+  @override
+  String get signup => 'إنشاء حساب';
+
+  @override
+  String get email_hint => 'البريد الإلكتروني';
+
+  @override
+  String get password_hint => 'كلمة السر';
+
+  @override
+  String get google_sign_in => 'المتابعة باستخدام Google';
+
+  @override
+  String get apple_sign_in => 'المتابعة باستخدام Apple';
 }

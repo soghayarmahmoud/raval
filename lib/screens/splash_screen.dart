@@ -63,10 +63,13 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
     _controller.forward();
 
     // تأخير الانتقال للصفحة الرئيسية
-   Timer(const Duration(milliseconds: 4200), () {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const MainScreen()), // <-- الانتقال إلى MainScreen
-    );
+  Timer(const Duration(milliseconds: 4200), () {
+    // التحقق أولاً إذا كانت الـ Widget ما زالت "مركبة" على الشاشة
+    if (mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const MainScreen()),
+      );
+    }
   });
   }
 
