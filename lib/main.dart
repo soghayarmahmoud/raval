@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:store/providers/favorites_provider.dart';
 import 'package:store/providers/locale_provider.dart';
 import 'package:store/providers/theme_provider.dart';
-import 'package:store/providers/dynamic_text_provider.dart';
 import 'package:store/services/auth_service.dart';
 import 'package:store/screens/splash_screen.dart';
 import 'package:store/screens/login_page.dart';
@@ -29,9 +28,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => FavoritesProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
-        ChangeNotifierProvider(
-            create: (_) => DynamicTextProvider()..loadContent()),
-        Provider(create: (_) => AuthService()),
+    Provider(create: (_) => AuthService()),
       ],
       child: const MyApp(),
     ),
@@ -47,7 +44,7 @@ class MyApp extends StatelessWidget {
     final localeProvider = Provider.of<LocaleProvider>(context);
 
     return MaterialApp(
-      title: 'Raval',
+      onGenerateTitle: (context) => AppLocalizations.of(context)!.appName,
       debugShowCheckedModeBanner: false,
       theme: lightTheme,
       darkTheme: darkTheme,

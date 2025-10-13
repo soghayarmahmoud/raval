@@ -1,3 +1,5 @@
+// In lib/screens/product_detail_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -5,7 +7,6 @@ import 'package:photo_view/photo_view.dart';
 
 import 'package:store/models/product_model.dart';
 import 'package:store/providers/favorites_provider.dart';
-import 'package:store/providers/dynamic_text_provider.dart';
 import 'package:store/services/cart_service.dart';
 import 'package:store/services/auth_service.dart';
 import 'package:store/screens/login_page.dart';
@@ -79,6 +80,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   Future<void> _buyNowFlow(BuildContext context) async {
     final authService = AuthService();
     var isLoggedIn = await authService.isLoggedIn();
+    if (!mounted) return;
     if (!isLoggedIn) {
       final result = await Navigator.push<bool>(
         context,
@@ -87,55 +89,20 @@ class _ProductDetailPageState extends State<ProductDetailPage>
       isLoggedIn = result == true;
     }
 
-    if (!isLoggedIn) return;
+    if (!isLoggedIn || !mounted) return;
 
-    final chooseResult = await Navigator.push<bool>(
+    await Navigator.push(
       context,
       MaterialPageRoute(builder: (c) => const LocationValidationPage()),
     );
-
-    if (chooseResult == true) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (c) => const CheckoutPage()),
-      );
-    }
-  }
-
-  String _textOrLoc(
-      DynamicTextProvider dynamicTextProvider, String key, String locValue) {
-    try {
-      final txt = dynamicTextProvider.getText(key);
-      if (txt.isNotEmpty) return txt;
-      return locValue;
-    } catch (_) {
-      return locValue;
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final favoritesProvider = Provider.of<FavoritesProvider>(context);
-    final dynamicTextProvider = Provider.of<DynamicTextProvider>(context);
     final isFavorite = favoritesProvider.isFavorite(widget.product);
     final theme = Theme.of(context);
     final loc = AppLocalizations.of(context)!;
-
-    final availableColorsLabel = _textOrLoc(
-        dynamicTextProvider, 'available_colors', loc.available_colors);
-    final availableSizesLabel =
-        _textOrLoc(dynamicTextProvider, 'available_sizes', loc.available_sizes);
-    final quantityLabel =
-        _textOrLoc(dynamicTextProvider, 'quantity', loc.quantity);
-    final descriptionLabel =
-        _textOrLoc(dynamicTextProvider, 'description', loc.description);
-    final additionalInfoLabel =
-        _textOrLoc(dynamicTextProvider, 'additional_info', loc.additional_info);
-    final addToCartLabel =
-        _textOrLoc(dynamicTextProvider, 'add_to_cart', loc.add_to_cart);
-    final addedToCartLabel =
-        _textOrLoc(dynamicTextProvider, 'added_to_cart', loc.added_to_cart);
-    final buyNowLabel = _textOrLoc(dynamicTextProvider, 'buy_now', loc.buy_now);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -241,7 +208,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '${widget.product.price.toStringAsFixed(2)} EGP',
+                    '${widget.product.price.toStringAsFixed(2)} ${loc.currency}',
                     style: TextStyle(
                       fontSize: 24,
                       color: theme.primaryColor,
@@ -251,7 +218,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   const SizedBox(height: 24),
                   if (widget.product.availableColors.isNotEmpty) ...[
                     Text(
-                      availableColorsLabel,
+                      loc.available_colors,
                       style: theme.textTheme.titleMedium,
                     ),
                     const SizedBox(height: 12),
@@ -291,7 +258,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ],
                   if (widget.product.availableSizes.isNotEmpty) ...[
                     Text(
-                      availableSizesLabel,
+                      loc.available_sizes,
                       style: theme.textTheme.titleMedium,
                     ),
                     const SizedBox(height: 12),
@@ -313,7 +280,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                     const SizedBox(height: 24),
                   ],
                   Text(
-                    quantityLabel,
+                    loc.quantity,
                     style: theme.textTheme.titleMedium,
                   ),
                   const SizedBox(height: 12),
@@ -351,7 +318,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    descriptionLabel,
+                    loc.description,
                     style: theme.textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
@@ -362,7 +329,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   const SizedBox(height: 24),
                   if (widget.product.additionalInfo.isNotEmpty) ...[
                     Text(
-                      additionalInfoLabel,
+                      loc.additional_info,
                       style: theme.textTheme.titleMedium,
                     ),
                     const SizedBox(height: 8),
@@ -409,14 +376,14 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                   _cartService.addToCart(widget.product, _quantity);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(addedToCartLabel),
+                      content: Text(loc.added_to_cart),
                     ),
                   );
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: Text(addToCartLabel),
+                child: Text(loc.add_to_cart),
               ),
             ),
             const SizedBox(width: 12),
@@ -424,7 +391,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
               width: 140,
               child: OutlinedButton(
                 onPressed: () => _buyNowFlow(context),
-                child: Text(buyNowLabel),
+                child: Text(loc.buy_now),
               ),
             ),
             const SizedBox(width: 8),
@@ -439,7 +406,6 @@ class _ProductDetailPageState extends State<ProductDetailPage>
             ),
             IconButton(
               onPressed: () {
-                // Share product logic (left as-is)
               },
               icon: const Icon(Icons.share),
             ),

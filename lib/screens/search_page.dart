@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:store/l10n/app_localizations.dart';
 import 'package:store/models/product_model.dart';
 import 'package:store/screens/home_page.dart';
 import 'package:store/screens/product_detail_page.dart';
 import 'package:store/services/cart_service.dart';
+import 'package:store/utils/navigation_util.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -22,14 +24,22 @@ class _SearchPageState extends State<SearchPage> {
   List<String> _selectedColors = [];
   List<String> _selectedSizes = [];
   
-  final List<String> _availableColors = ['وردي', 'أبيض', 'أزرق', 'أسود', 'أخضر'];
   final List<String> _availableSizes = ['S', 'M', 'L', 'XL'];
+  bool _didLoadProducts = false;
 
   @override
   void initState() {
     super.initState();
-    _loadAllProducts();
     _searchController.addListener(_applyAllFilters);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didLoadProducts) {
+      _loadAllProducts();
+      _didLoadProducts = true;
+    }
   }
 
   @override
@@ -40,7 +50,8 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void _loadAllProducts() {
-    final products = [..._dataService.getNewArrivals(), ..._dataService.getBestOffers()];
+    final loc = AppLocalizations.of(context)!;
+    final products = [..._dataService.getNewArrivals(loc), ..._dataService.getBestOffers(loc)];
     setState(() {
       _allProducts = products;
       _filteredProducts = products;
@@ -91,6 +102,9 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void _showFilterSheet() {
+    final loc = AppLocalizations.of(context)!;
+    final List<String> _availableColors = [loc.colorPink, loc.colorWhite, loc.colorBlue, loc.colorBlack, loc.colorGreen];
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -109,13 +123,13 @@ class _SearchPageState extends State<SearchPage> {
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
                   child: Column(
                     children: [
-                      Text('الفلاتر', style: Theme.of(context).textTheme.headlineSmall),
+                      Text(loc.filters, style: Theme.of(context).textTheme.headlineSmall),
                       const Divider(height: 24),
                       Expanded(
                         child: ListView( 
                           controller: scrollController, 
                           children: [
-                            Text('السعر (EGP)', style: Theme.of(context).textTheme.titleLarge),
+                            Text(loc.priceKWD, style: Theme.of(context).textTheme.titleLarge),
                             RangeSlider(
                               values: _priceRange,
                               min: 0,
@@ -125,7 +139,7 @@ class _SearchPageState extends State<SearchPage> {
                               onChanged: (values) => setSheetState(() => _priceRange = values),
                             ),
                             const SizedBox(height: 24),
-                            Text('اللون', style: Theme.of(context).textTheme.titleLarge),
+                            Text(loc.color, style: Theme.of(context).textTheme.titleLarge),
                             Wrap(
                               spacing: 8.0,
                               children: _availableColors.map((color) {
@@ -142,7 +156,7 @@ class _SearchPageState extends State<SearchPage> {
                               }).toList(),
                             ),
                             const SizedBox(height: 24),
-                            Text('المقاس', style: Theme.of(context).textTheme.titleLarge),
+                            Text(loc.size, style: Theme.of(context).textTheme.titleLarge),
                             Wrap(
                               spacing: 8.0,
                               children: _availableSizes.map((size) {
@@ -164,12 +178,12 @@ class _SearchPageState extends State<SearchPage> {
                       const SizedBox(height: 12),
                       Row(
                         children: [
-                          Expanded(child: OutlinedButton(onPressed: _resetFilters, child: const Text('إعادة تعيين'))),
+                          Expanded(child: OutlinedButton(onPressed: _resetFilters, child: Text(loc.reset))),
                           const SizedBox(width: 12),
                           Expanded(child: ElevatedButton(onPressed: () {
                             _applyAllFilters();
                             Navigator.of(context).pop();
-                          }, child: const Text('تطبيق'))),
+                          }, child: Text(loc.apply))),
                         ],
                       ),
                     ],
@@ -185,12 +199,13 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         title: TextField(
           controller: _searchController,
           decoration: InputDecoration(
-            hintText: 'ابحث عن منتجاتك المفضلة...',
+            hintText: loc.searchForYourFavoriteProducts,
             border: InputBorder.none,
             hintStyle: TextStyle(color: Colors.grey[600]),
           ),
@@ -204,7 +219,7 @@ class _SearchPageState extends State<SearchPage> {
         ],
       ),
       body: _filteredProducts.isEmpty
-          ? const Center(child: Text('لا توجد منتجات تطابق بحثك أو الفلاتر المختارة'))
+          ? Center(child: Text(loc.noProductsMatchFilters))
           : GridView.builder(
               padding: const EdgeInsets.all(12.0),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -219,13 +234,13 @@ class _SearchPageState extends State<SearchPage> {
                 return ProductCard(
                   product: product,
                   onCardTap: () {
-                     Navigator.push(context, MaterialPageRoute(builder: (context) => ProductDetailPage(product: product)));
+                     navigateWithLoading(context, ProductDetailPage(product: product));
                   },
                   onAddToCart: () {
                      final cartService = CartService();
                      cartService.addToCart(product, 1);
                      ScaffoldMessenger.of(context).showSnackBar(
-                       SnackBar(content: Text('تمت إضافة "${product.name}" إلى السلة'))
+                       SnackBar(content: Text(loc.addedXToCart(product.name)))
                      );
                   },
                 );

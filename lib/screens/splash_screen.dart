@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:store/l10n/app_localizations.dart';
 import 'main_screen.dart'; // <-- استيراد الشاشة الجديدة
 import 'package:store/theme.dart';
 
@@ -81,6 +82,7 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
@@ -111,7 +113,7 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
                 FadeTransition(
                   opacity: _textOpacityAnimation,
                   child: Text(
-                    'RAVAL',
+                    loc.appName,
                     style: TextStyle(
                       fontFamily: 'Exo2',
                       fontSize: 50,

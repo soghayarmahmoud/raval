@@ -1,15 +1,10 @@
-// In lib/screens/profile_page.dart
-import 'dart:math';
-import 'dart:convert';
-import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
+import 'package:store/l10n/app_localizations.dart';
 import 'package:store/models/address_model.dart';
 import 'package:store/providers/locale_provider.dart';
 import 'package:store/providers/theme_provider.dart';
-import 'package:store/providers/dynamic_text_provider.dart';
 import 'package:store/screens/add_address_page.dart';
 import 'package:store/screens/branches_page.dart';
 import 'package:store/screens/favorites_page.dart';
@@ -23,7 +18,6 @@ import 'package:store/services/auth_service.dart';
 import 'package:store/services/address_service.dart';
 import 'package:store/services/notification_service.dart';
 import 'package:store/theme.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 // موديل لتنظيم بيانات صناديق الخدمات
 class ServiceBoxModel {
@@ -37,128 +31,26 @@ class ServiceBoxModel {
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
-  GoogleSignIn get _googleSignIn => GoogleSignIn.instance;
-
-// In lib/screens/profile_page.dart
-
-// ... (باقي الكود في ملفك كما هو)
-
-// استخدم هذه الدالة النهائية بدلاً من أي نسخة قديمة
-  Future<void> _handleGoogleSignIn(BuildContext context) async {
-    try {
-      // الخطوة 1: اطلب من المستخدم تسجيل الدخول بحسابه في جوجل
-      // هذا السطر يفتح نافذة جوجل المنبثقة للاختيار من بين الحسابات
-
-      final GoogleSignInAccount? googleUser =
-          await _googleSignIn.authenticate();
-
-      // الخطوة 2: تحقق مما إذا كان المستخدم قد ألغى العملية
-      if (googleUser == null) {
-        // ألغى المستخدم تسجيل الدخول، لا تفعل شيئًا
-        print('Google Sign-In was canceled.');
-        return;
-      }
-
-      // الخطوة 3: احصل على توكنات المصادقة من جوجل بعد نجاح الدخول
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      // الخطوة 4: تأكد من أن التوكنات ليست فارغة (خطوة أمان إضافية)
-      if (googleAuth.idToken == null || googleAuth.idToken == null) {
-        throw 'Missing Google Auth Tokens';
-      }
-
-      // الخطوة 5: أنشئ "بيانات اعتماد" خاصة بـ Firebase باستخدام التوكنات
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.idToken,
-        idToken: googleAuth.idToken,
-      );
-
-      // الخطوة 6: استخدم بيانات الاعتماد لتسجيل الدخول فعليًا في Firebase
-      final userCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
-
-      // الخطوة 7: أظهر رسالة نجاح (مع التأكد من أن الصفحة ما زالت معروضة)
-      if (!context.mounted) return;
-
-      if (userCredential.user != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('تم تسجيل الدخول بنجاح باستخدام جوجل'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      // في حالة حدوث أي خطأ، اطبعه وأظهر رسالة للمستخدم
-      print('Error during Google Sign-In: $e');
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('فشل تسجيل الدخول: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-// ... (باقي الكود في ملفك كما هو)
-
-  Future<void> _handleAppleSignIn(BuildContext context) async {
-    final rawNonce = _generateNonce();
-    final nonce = sha256.convert(utf8.encode(rawNonce)).toString();
-
-    try {
-      final credential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-        nonce: nonce,
-      );
-
-      final oauthCredential = OAuthProvider('apple.com').credential(
-        idToken: credential.identityToken,
-        rawNonce: rawNonce,
-      );
-
-      await FirebaseAuth.instance.signInWithCredential(oauthCredential);
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to sign in with Apple: $e')),
-      );
-    }
-  }
-
-  // دالة مساعدة لإنشاء Nonce
-  String _generateNonce([int length = 32]) {
-    const charset =
-        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
-    final random = Random.secure();
-    return List.generate(length, (_) => charset[random.nextInt(charset.length)])
-        .join();
-  }
-
   @override
   Widget build(BuildContext context) {
     final authService = AuthService();
+    final localizations = AppLocalizations.of(context)!;
 
     final List<ServiceBoxModel> services = [
       ServiceBoxModel(
-          title: 'طلباتي',
+          title: localizations.myOrders,
           icon: Icons.shopping_bag_outlined,
           color: AppColors.primaryPink),
       ServiceBoxModel(
-          title: 'تتبع الشحنة',
+          title: localizations.trackShipment,
           icon: Icons.local_shipping_outlined,
           color: AppColors.accentTeal),
       ServiceBoxModel(
-          title: 'المفضلة',
+          title: localizations.favorites,
           icon: Icons.favorite_border,
           color: AppColors.accentYellow),
       ServiceBoxModel(
-          title: 'عناوين الفروع',
+          title: localizations.branchAddresses,
           icon: Icons.store_mall_directory_outlined,
           color: AppColors.accentPurple),
     ];
@@ -168,7 +60,7 @@ class ProfilePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('الحساب الشخصي'),
+        title: Text(localizations.profile),
       ),
       body: StreamBuilder<User?>(
         stream: authService.authStateChanges,
@@ -217,16 +109,16 @@ class ProfilePage extends StatelessWidget {
                         onTap: () {
                           switch (index) {
                             case 0: // Orders
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => OrdersPage()));
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => const OrdersPage()));
                               break;
                             case 1: // Shipping
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => ShippingTrackingPage()));
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => const ShippingTrackingPage()));
                               break;
                             case 2: // Favorites
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => FavoritesPage()));
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => const FavoritesPage()));
                               break;
                             case 3: // Branches
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => BranchesPage()));
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => const BranchesPage()));
                               break;
                           }
                         },
@@ -237,16 +129,16 @@ class ProfilePage extends StatelessWidget {
 
                   // قسم العناوين يظهر فقط للمستخدم المسجل
                   if (isLoggedIn) ...[
-                    _buildSectionTitle('العناوين المحفوظة'),
+                    _buildSectionTitle(localizations.addresses),
                     _buildAddressesSection(context, userAddresses),
                     const SizedBox(height: 24),
                   ],
 
-                  _buildSectionTitle('الإعدادات'),
+                  _buildSectionTitle(localizations.settings),
                   _buildSettingsMenu(context),
                   const SizedBox(height: 24),
 
-                  _buildSectionTitle('الدعم والمساعدة'),
+                  _buildSectionTitle(localizations.supportAndHelp),
                   _buildSupportMenu(context),
                   const SizedBox(height: 32),
 
@@ -264,6 +156,7 @@ class ProfilePage extends StatelessWidget {
   // --- واجهة تظهر إذا كان المستخدم مسجل دخوله ---
   Widget _buildLoggedInUserInfo(
       BuildContext context, User user, AuthService authService) {
+    final localizations = AppLocalizations.of(context)!;
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -288,7 +181,7 @@ class ProfilePage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        user.displayName ?? 'مرحباً بك',
+                        user.displayName ?? localizations.welcomeMessage,
                         style: const TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                         overflow: TextOverflow.ellipsis,
@@ -310,8 +203,8 @@ class ProfilePage extends StatelessWidget {
               width: double.infinity,
               child: TextButton.icon(
                 icon: const Icon(Icons.logout, color: Colors.red),
-                label: const Text('تسجيل الخروج',
-                    style: TextStyle(color: Colors.red)),
+                label: Text(localizations.signup,
+                    style: const TextStyle(color: Colors.red)),
                 onPressed: () async {
                   await authService.signOut();
                 },
@@ -329,7 +222,8 @@ class ProfilePage extends StatelessWidget {
 
   // --- واجهة تظهر للزائر (غير المسجل) ---
   Widget _buildGuestUserInfo(BuildContext context) {
-    final dynamicTextProvider = Provider.of<DynamicTextProvider>(context);
+    final authService = AuthService();
+    final localizations = AppLocalizations.of(context)!;
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -338,11 +232,11 @@ class ProfilePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(dynamicTextProvider.getText('welcome'),
+            Text(localizations.welcomeMessage, 
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
-            Text(dynamicTextProvider.getText('loginPrompt'),
+            Text(localizations.loginPrompt, 
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey.shade600)),
             const SizedBox(height: 20),
@@ -351,7 +245,7 @@ class ProfilePage extends StatelessWidget {
                   MaterialPageRoute(builder: (c) => const LoginPage())),
               style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12)),
-              child: Text(dynamicTextProvider.getText('login'),
+              child: Text(localizations.login, 
                   style: const TextStyle(fontSize: 16)),
             ),
             const SizedBox(height: 8),
@@ -360,23 +254,65 @@ class ProfilePage extends StatelessWidget {
                   MaterialPageRoute(builder: (c) => const SignUpPage())),
               style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12)),
-              child: Text(dynamicTextProvider.getText('signup'),
+              child: Text(localizations.signup, 
                   style: const TextStyle(fontSize: 16)),
             ),
             const SizedBox(height: 16),
             const Divider(),
             const SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: () => {} /*_handleGoogleSignIn(context)*/,
+              onPressed: () async {
+                try {
+                  final userCredential = await authService.signInWithGoogle();
+                  if (userCredential?.user != null) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('تم تسجيل الدخول بنجاح باستخدام جوجل'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('فشل تسجيل الدخول: ${e.toString()}'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
               icon: const Icon(Icons.g_mobiledata), // يمكنك تغيير الأيقونة
-              label: Text(dynamicTextProvider.getText('googleSignIn')),
+              label: Text(localizations.google_sign_in),
             ),
             const SizedBox(height: 8),
             if (Theme.of(context).platform == TargetPlatform.iOS)
               ElevatedButton.icon(
-                onPressed: () => _handleAppleSignIn(context),
+                onPressed: () async {
+                  try {
+                    final userCredential = await authService.signInWithApple();
+                    if (userCredential?.user != null) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('تم تسجيل الدخول بنجاح باستخدام آبل'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('فشل تسجيل الدخول: ${e.toString()}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
                 icon: const Icon(Icons.apple),
-                label: Text(dynamicTextProvider.getText('appleSignIn')),
+                label: Text(localizations.apple_sign_in),
               ),
           ],
         ),
@@ -419,11 +355,12 @@ class ProfilePage extends StatelessWidget {
   Widget _buildAddressesSection(
       BuildContext context, List<AddressModel> addresses) {
     final addressService = AddressService();
+    final localizations = AppLocalizations.of(context)!;
 
     return Column(
       children: [
         if (addresses.isEmpty)
-          const Text("لا توجد عناوين محفوظة.", style: TextStyle(fontSize: 16)),
+          Text(localizations.noAddresses, style: const TextStyle(fontSize: 16)),
         if (addresses.isNotEmpty)
           ListView.builder(
             shrinkWrap: true,
@@ -469,19 +406,19 @@ class ProfilePage extends StatelessWidget {
                         final confirm = await showDialog<bool>(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text('تأكيد الحذف'),
+                            title: Text(localizations.confirmDelete),
                             content:
-                                const Text('هل أنت متأكد من حذف هذا العنوان؟'),
+                                Text(localizations.deleteAddressConfirm),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context, false),
-                                child: const Text('إلغاء'),
+                                child: Text(localizations.cancel),
                               ),
                               TextButton(
                                 onPressed: () => Navigator.pop(context, true),
-                                child: const Text(
-                                  'حذف',
-                                  style: TextStyle(color: Colors.red),
+                                child: Text(
+                                  localizations.deleteAddress,
+                                  style: const TextStyle(color: Colors.red),
                                 ),
                               ),
                             ],
@@ -510,23 +447,23 @@ class ProfilePage extends StatelessWidget {
                     },
                     itemBuilder: (BuildContext context) =>
                         <PopupMenuEntry<String>>[
-                      const PopupMenuItem<String>(
+                      PopupMenuItem<String>(
                         value: 'edit',
                         child: Row(
                           children: [
-                            Icon(Icons.edit),
-                            SizedBox(width: 8),
-                            Text('تعديل'),
+                            const Icon(Icons.edit),
+                            const SizedBox(width: 8),
+                            Text(localizations.editAddress),
                           ],
                         ),
                       ),
-                      const PopupMenuItem<String>(
+                      PopupMenuItem<String>(
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text('حذف', style: TextStyle(color: Colors.red)),
+                            const Icon(Icons.delete, color: Colors.red),
+                            const SizedBox(width: 8),
+                            Text(localizations.deleteAddress, style: const TextStyle(color: Colors.red)),
                           ],
                         ),
                       ),
@@ -540,7 +477,7 @@ class ProfilePage extends StatelessWidget {
         const SizedBox(height: 8),
         OutlinedButton.icon(
           icon: const Icon(Icons.add),
-          label: const Text('إضافة عنوان جديد'),
+          label: Text(localizations.addNewAddress),
           onPressed: () async {
             final result = await Navigator.push<bool>(
               context,
@@ -573,6 +510,7 @@ class ProfilePage extends StatelessWidget {
 
   Widget _buildSettingsMenu(BuildContext context) {
     final localeProvider = Provider.of<LocaleProvider>(context, listen: false);
+    final localizations = AppLocalizations.of(context)!;
 
     return Card(
       elevation: 2,
@@ -581,7 +519,7 @@ class ProfilePage extends StatelessWidget {
         children: [
           ListTile(
             leading: const Icon(Icons.language),
-            title: const Text('اللغة'),
+            title: Text(localizations.language),
             trailing: Text(localeProvider.locale.languageCode == 'ar'
                 ? 'العربية'
                 : 'English'),
@@ -612,18 +550,18 @@ class ProfilePage extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.brightness_6_outlined),
-            title: const Text('الثيم'),
+            title: Text(localizations.theme),
             onTap: () {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: const Text('اختر الثيم'),
+                  title: Text(localizations.theme),
                   content: Consumer<ThemeProvider>(
                     builder: (context, provider, child) => Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         RadioListTile<ThemeMode>(
-                          title: const Text('فاتح'),
+                          title: Text(localizations.lightTheme),
                           value: ThemeMode.light,
                           groupValue: provider.themeMode,
                           onChanged: (value) {
@@ -632,7 +570,7 @@ class ProfilePage extends StatelessWidget {
                           },
                         ),
                         RadioListTile<ThemeMode>(
-                          title: const Text('داكن'),
+                          title: Text(localizations.darkTheme),
                           value: ThemeMode.dark,
                           groupValue: provider.themeMode,
                           onChanged: (value) {
@@ -641,7 +579,7 @@ class ProfilePage extends StatelessWidget {
                           },
                         ),
                         RadioListTile<ThemeMode>(
-                          title: const Text('افتراضي للنظام'),
+                          title: Text(localizations.systemTheme),
                           value: ThemeMode.system,
                           groupValue: provider.themeMode,
                           onChanged: (value) {
@@ -658,7 +596,7 @@ class ProfilePage extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.notifications_outlined),
-            title: const Text('Send Test Notification'),
+            title: Text(localizations.sendTestNotification),
             onTap: () {
               NotificationService().sendTestNotification();
             },
@@ -669,7 +607,7 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _buildSupportMenu(BuildContext context) {
-    final dynamicTextProvider = Provider.of<DynamicTextProvider>(context);
+    final localizations = AppLocalizations.of(context)!;
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -677,7 +615,7 @@ class ProfilePage extends StatelessWidget {
         children: [
           ListTile(
               leading: const Icon(Icons.support_agent_outlined),
-              title: Text(dynamicTextProvider.getText('supportChat')),
+              title: Text(localizations.supportChat),
               onTap: () {
                 Navigator.push(
                   context,
@@ -687,7 +625,7 @@ class ProfilePage extends StatelessWidget {
               }),
           ListTile(
               leading: const Icon(Icons.help_outline),
-              title: Text(dynamicTextProvider.getText('faq')),
+              title: Text(localizations.faq),
               onTap: () {
                 Navigator.push(
                   context,

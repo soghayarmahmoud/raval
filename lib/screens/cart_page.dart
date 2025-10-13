@@ -1,4 +1,3 @@
-// In lib/screens/cart_page.dart
 import 'package:flutter/material.dart';
 import 'package:store/l10n/app_localizations.dart';
 import 'package:store/models/cart_item_model.dart';
@@ -50,7 +49,6 @@ class _CartPageState extends State<CartPage> {
       if (signupSuccess != true || !mounted) return;
     }
 
-    // Check if user has a saved address
     final addressService = AddressService();
     final hasAddress = await addressService.hasAddress();
 
@@ -85,7 +83,7 @@ class _CartPageState extends State<CartPage> {
               !snapshot.hasData ||
               snapshot.data!.isEmpty) {
             return Center(
-                child: Text(loc.noAddresses,
+                child: Text(loc.cartIsEmpty,
                     style: const TextStyle(fontSize: 18)));
           }
 
@@ -137,12 +135,9 @@ class _CartPageState extends State<CartPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // --- تم التعديل هنا: استخدام Flexible ---
-                // هذا يسمح للنص بأن يأخذ المساحة المتاحة ويتجنب الأخطاء
                 Flexible(
                   child: Text(
-                    //todo: '${loc.totalLabel} ($totalItems ${loc.products})',
-                    'products ($totalItems) price: ${totalPrice.toStringAsFixed(2)} EGP',
+                    loc.totalPrice(totalItems),
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -150,7 +145,7 @@ class _CartPageState extends State<CartPage> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text('${totalPrice.toStringAsFixed(2)} EGP',
+                Text('${totalPrice.toStringAsFixed(2)} ${loc.currency}',
                     style: const TextStyle(
                         fontSize: 22, fontWeight: FontWeight.bold)),
               ],
@@ -178,7 +173,6 @@ class _CartPageState extends State<CartPage> {
   }
 }
 
-// --- تم التعديل هنا: استخدام ListTile لجعلها متجاوبة ---
 class _CartItemCard extends StatelessWidget {
   final CartItemModel item;
   final ValueChanged<int> onQuantityChanged;
@@ -187,33 +181,31 @@ class _CartItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 4.0),
       child: ListTile(
         contentPadding:
             const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-        // `leading` لوضع الصورة على اليسار (أو اليمين في العربي)
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(8.0),
           child: Image.network(
             item.product.imageUrl,
-            width: 70, // يمكنك تعديل الحجم حسب الرغبة
+            width: 70,
             height: 70,
             fit: BoxFit.cover,
           ),
         ),
-        // `title` لوضع اسم المنتج
         title: Text(
           item.product.name,
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
-        // `subtitle` لوضع السعر
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 4.0),
           child: Text(
-            '${item.product.price.toStringAsFixed(2)} EGP',
+            '${item.product.price.toStringAsFixed(2)} ${loc.currency}',
             style: TextStyle(
               fontSize: 15,
               color: Theme.of(context).primaryColor,
@@ -221,9 +213,8 @@ class _CartItemCard extends StatelessWidget {
             ),
           ),
         ),
-        // `trailing` لوضع عداد الكمية في نهاية السطر
         trailing: Row(
-          mainAxisSize: MainAxisSize.min, // ليأخذ أقل مساحة ممكنة
+          mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
               icon: const Icon(Icons.remove_circle_outline),

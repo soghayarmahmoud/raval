@@ -1,5 +1,6 @@
 // In lib/screens/category_products_page.dart
 import 'package:flutter/material.dart';
+import 'package:store/l10n/app_localizations.dart';
 import 'package:store/models/product_model.dart';
 import 'package:store/screens/home_page.dart';
 
@@ -24,7 +25,6 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
   List<String> _selectedColors = [];
   List<String> _selectedSizes = [];
 
-  final List<String> _availableColors = ['وردي', 'أبيض', 'أزرق', 'أسود', 'أخضر'];
   final List<String> _availableSizes = ['S', 'M', 'L', 'XL'];
 
 
@@ -41,14 +41,12 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
       return p.price >= _priceRange.start && p.price <= _priceRange.end;
     }).toList();
 
-    // 2. الفلترة باللون
     if (_selectedColors.isNotEmpty) {
       tempProducts = tempProducts.where((p) {
         return p.colors.any((color) => _selectedColors.contains(color));
       }).toList();
     }
 
-    // 3. الفلترة بالمقاس
     if (_selectedSizes.isNotEmpty) {
       tempProducts = tempProducts.where((p) {
         return p.sizes.any((size) => _selectedSizes.contains(size));
@@ -59,7 +57,7 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
       _filteredProducts = tempProducts;
     });
 
-    Navigator.of(context).pop(); // إغلاق نافذة الفلاتر
+    Navigator.of(context).pop();
   }
 
   void _resetFilters() {
@@ -74,6 +72,9 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
 
 
   void _showFilterSheet() {
+    final loc = AppLocalizations.of(context)!;
+    final List<String> _availableColors = [loc.colorPink, loc.colorWhite, loc.colorBlue, loc.colorBlack, loc.colorGreen];
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -92,11 +93,10 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('الفلاتر', style: Theme.of(context).textTheme.headlineSmall),
+                    Text(loc.filters, style: Theme.of(context).textTheme.headlineSmall),
                     const Divider(height: 24),
                     
-                    // فلتر السعر
-                    Text('السعر (EGP)', style: Theme.of(context).textTheme.titleLarge),
+                    Text(loc.priceKWD, style: Theme.of(context).textTheme.titleLarge),
                     RangeSlider(
                       values: _priceRange,
                       min: 0,
@@ -110,7 +110,7 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
 
                     const SizedBox(height: 24),
 
-                    Text('اللون', style: Theme.of(context).textTheme.titleLarge),
+                    Text(loc.color, style: Theme.of(context).textTheme.titleLarge),
                     Wrap(
                       spacing: 8.0,
                       children: _availableColors.map((color) {
@@ -133,7 +133,7 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
 
                      const SizedBox(height: 24),
 
-                    Text('المقاس', style: Theme.of(context).textTheme.titleLarge),
+                    Text(loc.size, style: Theme.of(context).textTheme.titleLarge),
                     Wrap(
                       spacing: 8.0,
                       children: _availableSizes.map((size) {
@@ -156,9 +156,9 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
                     const Spacer(),
                     Row(
                       children: [
-                        Expanded(child: OutlinedButton(onPressed: _resetFilters, child: const Text('إعادة تعيين'))),
+                        Expanded(child: OutlinedButton(onPressed: _resetFilters, child: Text(loc.reset))),
                         const SizedBox(width: 12),
-                        Expanded(child: ElevatedButton(onPressed: _applyFilters, child: const Text('تطبيق'))),
+                        Expanded(child: ElevatedButton(onPressed: _applyFilters, child: Text(loc.apply))),
                       ],
                     ),
                   ],
@@ -173,6 +173,7 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.categoryName),
@@ -184,7 +185,7 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
         ],
       ),
       body: _filteredProducts.isEmpty
-          ? const Center(child: Text('لا توجد منتجات تطابق هذه الفلاتر'))
+          ? Center(child: Text(loc.noProductsMatchFilters))
           : GridView.builder(
               padding: const EdgeInsets.all(12.0),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

@@ -1,102 +1,53 @@
 {
     "@@locale": "ar",
     "appTitle": "متجرنا",
-    "@appTitle": {
-        "description": "The title of the application"
-    },
+    "@appTitle": { "description": "The title of the application" },
     "cartPageTitle": "سلة المشتريات",
-    "@cartPageTitle": {
-        "description": "Title of the shopping cart page"
-    },
+    "@cartPageTitle": { "description": "Title of the shopping cart page" },
     "checkoutButtonText": "الانتقال إلى الدفع",
-    "@checkoutButtonText": {
-        "description": "Text for the checkout button"
-    },
+    "@checkoutButtonText": { "description": "Text for the checkout button" },
     "addAddressTitle": "إضافة عنوان جديد",
-    "@addAddressTitle": {
-        "description": "Title of the add address page"
-    },
+    "@addAddressTitle": { "description": "Title of the add address page" },
     "selectLocation": "تحديد الموقع",
-    "@selectLocation": {
-        "description": "Text for selecting location"
-    },
+    "@selectLocation": { "description": "Text for selecting location" },
     "governorate": "المحافظة",
-    "@governorate": {
-        "description": "Label for governorate selection"
-    },
+    "@governorate": { "description": "Label for governorate selection" },
     "addressDetails": "تفاصيل العنوان",
-    "@addressDetails": {
-        "description": "Label for address details"
-    },
+    "@addressDetails": { "description": "Label for address details" },
     "saveAddress": "حفظ العنوان",
-    "@saveAddress": {
-        "description": "Button text for saving address"
-    },
+    "@saveAddress": { "description": "Button text for saving address" },
     "settings": "الإعدادات",
-    "@settings": {
-        "description": "Settings section title"
-    },
+    "@settings": { "description": "Settings section title" },
     "language": "اللغة",
-    "@language": {
-        "description": "Language selection title"
-    },
+    "@language": { "description": "Language selection title" },
     "theme": "الثيم",
-    "@theme": {
-        "description": "Theme selection title"
-    },
+    "@theme": { "description": "Theme selection title" },
     "lightTheme": "فاتح",
-    "@lightTheme": {
-        "description": "Light theme option"
-    },
+    "@lightTheme": { "description": "Light theme option" },
     "darkTheme": "داكن",
-    "@darkTheme": {
-        "description": "Dark theme option"
-    },
+    "@darkTheme": { "description": "Dark theme option" },
     "systemTheme": "النظام",
-    "@systemTheme": {
-        "description": "System theme option"
-    },
+    "@systemTheme": { "description": "System theme option" },
     "addresses": "العناوين المحفوظة",
-    "@addresses": {
-        "description": "Saved addresses section title"
-    },
+    "@addresses": { "description": "Saved addresses section title" },
     "noAddresses": "لا توجد عناوين محفوظة",
-    "@noAddresses": {
-        "description": "Text shown when no addresses are saved"
-    },
+    "@noAddresses": { "description": "Text shown when no addresses are saved" },
     "addNewAddress": "إضافة عنوان جديد",
-    "@addNewAddress": {
-        "description": "Button text for adding new address"
-    },
+    "@addNewAddress": { "description": "Button text for adding new address" },
     "editAddress": "تعديل العنوان",
-    "@editAddress": {
-        "description": "Edit address option"
-    },
+    "@editAddress": { "description": "Edit address option" },
     "deleteAddress": "حذف العنوان",
-    "@deleteAddress": {
-        "description": "Delete address option"
-    },
+    "@deleteAddress": { "description": "Delete address option" },
     "confirmDelete": "تأكيد الحذف",
-    "@confirmDelete": {
-        "description": "Confirmation dialog title for delete"
-    },
+    "@confirmDelete": { "description": "Confirmation dialog title for delete" },
     "deleteAddressConfirm": "هل أنت متأكد من حذف هذا العنوان؟",
-    "@deleteAddressConfirm": {
-        "description": "Confirmation message for address deletion"
-    },
+    "@deleteAddressConfirm": { "description": "Confirmation message for address deletion" },
     "yes": "نعم",
-    "@yes": {
-        "description": "Yes button text"
-    },
+    "@yes": { "description": "Yes button text" },
     "no": "لا",
-    "@no": {
-        "description": "No button text"
-    },
+    "@no": { "description": "No button text" },
     "cancel": "إلغاء",
-    "@cancel": {
-        "description": "Cancel button text"
-    }
-    ,
+    "@cancel": { "description": "Cancel button text" },
     "add_to_cart": "أضف إلى السلة",
     "@add_to_cart": { "description": "Add to cart button" },
     "added_to_cart": "تمت الإضافة إلى السلة",
@@ -124,5 +75,256 @@
     "google_sign_in": "المتابعة باستخدام Google",
     "@google_sign_in": { "description": "Google sign in button" },
     "apple_sign_in": "المتابعة باستخدام Apple",
-    "@apple_sign_in": { "description": "Apple sign in button" }
+    "@apple_sign_in": { "description": "Apple sign in button" },
+    "myOrders": "طلباتي",
+    "trackShipment": "تتبع الشحنة",
+    "favorites": "المفضلة",
+    "branchAddresses": "عناوين الفروع",
+    "profile": "الحساب الشخصي",
+    "supportAndHelp": "الدعم والمساعدة",
+    "welcomeMessage": "مرحباً بك",
+    "loginPrompt": "سجل الدخول أو أنشئ حساباً للوصول الكامل",
+    "sendTestNotification": "إرسال إشعار تجريبي",
+    "supportChat": "محادثة الدعم",
+    "faq": "الأسئلة الشائعة",
+    "newArrivals": "وصل حديثًا",
+    "bestOffers": "أفضل العروض",
+    "category_all": "الكل",
+    "category_girls": "بناتي",
+    "category_boys": "ولادي",
+    "category_baby": "بيبي",
+    "category_sales": "تنزيلات",
+    "addedXToCart": "تمت إضافة {productName} إلى السلة",
+    "@addedXToCart": {
+        "description": "Snackbar message with product name",
+        "placeholders": {
+            "productName": { "type": "String" }
+        }
+    },
+    "totalPrice": "الإجمالي ({itemCount} منتجات)",
+    "@totalPrice": {
+        "placeholders": {
+            "itemCount": { "type": "int" }
+        }
+    },
+    "checkout": "إتمام الطلب",
+    "shippingAddress": "عنوان الشحن",
+    "noAddressSelected": "لا يوجد عنوان محدد",
+    "change": "تغيير",
+    "orderSummary": "ملخص الطلب",
+    "productsCount": "{count} منتجات",
+    "@productsCount": {
+        "placeholders": {
+            "count": { "type": "int" }
+        }
+    },
+    "subtotal": "مجموع المنتجات",
+    "shippingFee": "رسوم الشحن",
+    "totalAmount": "المبلغ الإجمالي",
+    "completePayment": "إتمام الدفع",
+    "manualEntry": "إدخال يدوي",
+    "selectFromMap": "تحديد من الخريطة",
+    "addressNameHint": "اسم العنوان (مثل: المنزل، العمل)",
+    "addressDetailsHint": "تفاصيل العنوان (شارع، قطعة، منزل...)",
+    "selectGovernorate": "اختر محافظة",
+    "fieldRequired": "هذا الحقل مطلوب",
+    "addBranch": "إضافة فرع جديد",
+    "selectYourGovernorate": "اختر محافظتك",
+    "noBranchesIn": "لا توجد فروع في {governorateName}",
+    "@noBranchesIn": {
+        "placeholders": {
+            "governorateName": { "type": "String" }
+        }
+    },
+    "openMap": "فتح الخريطة",
+    "call": "اتصال",
+    "filters": "الفلاتر",
+    "priceKWD": "السعر (KWD)",
+    "color": "اللون",
+    "size": "المقاس",
+    "reset": "إعادة تعيين",
+    "apply": "تطبيق",
+    "noProductsMatchFilters": "لا توجد منتجات تطابق هذه الفلاتر",
+    "favoritesListIsEmpty": "قائمة المفضلة فارغة",
+    "addToFavoritesHint": "أضف منتجاتك التي تحبها بالضغط على أيقونة القلب",
+    "searchInFAQ": "البحث في الأسئلة الشائعة...",
+    "all": "الكل",
+    "or": "أو",
+    "haveAnAccount": "لديك حساب بالفعل؟",
+    "activeOrders": "جاري التنفيذ",
+    "completedOrders": "مكتمل",
+    "cancelledOrders": "ملغي",
+    "orderNumber": "رقم الطلب: {number}",
+    "@orderNumber": {
+        "placeholders": {
+            "number": { "type": "String" }
+        }
+    },
+    "orderDate": "تاريخ الطلب: {date}",
+    "@orderDate": {
+        "placeholders": {
+            "date": { "type": "String" }
+        }
+    },
+    "productsNo": "عدد المنتجات: {count}",
+    "@productsNo": {
+        "placeholders": {
+            "count": { "type": "int" }
+        }
+    },
+    "totalPriceValue": "المبلغ الإجمالي: {price} KWD",
+    "@totalPriceValue": {
+        "placeholders": {
+            "price": { "type": "String" }
+        }
+    },
+    "orderDetails": "تفاصيل الطلب",
+    "cancelOrder": "إلغاء الطلب",
+    "trackingNumber": "رقم التتبع",
+    "shippingCompany": "شركة الشحن",
+    "estimatedDelivery": "الوقت المتوقع للتوصيل",
+    "recipient": "المستلم",
+    "phoneNumber": "رقم الهاتف",
+    "deliveryAddress": "عنوان التوصيل",
+    "createNewAccount": "إنشاء حساب جديد",
+    "fullName": "الاسم الكامل",
+    "confirmPassword": "تأكيد كلمة السر",
+    "passwordsDoNotMatch": "كلمتا السر غير متطابقتين",
+    "customerService": "خدمة العملاء",
+    "endConversation": "إنهاء المحادثة",
+    "endConversationConfirm": "هل أنت متأكد من إنهاء المحادثة؟",
+    "end": "إنهاء",
+    "startConversationHint": "ابدأ محادثتك مع خدمة العملاء",
+    "writeYourMessage": "اكتب رسالتك هنا...",
+    "allowLocationAccess": "السماح بالوصول للموقع",
+    "locationAccessReason": "نحتاج إلى الوصول إلى موقعك لتحديد عنوانك بدقة. يرجى تفعيل خدمة الموقع من إعدادات التطبيق.",
+    "ok": "حسناً",
+    "locationError": "حدث خطأ أثناء تحديد موقعك. يرجى المحاولة مرة أخرى.",
+    "mainAddress": "العنوان الرئيسي",
+    "locationSetOnMap": "تم تحديد الموقع على الخريطة",
+    "notSet": "غير محدد",
+    "addressSavedSuccess": "تم حفظ العنوان بنجاح",
+    "addressSaveError": "حدث خطأ أثناء حفظ العنوان. يرجى المحاولة مرة أخرى.",
+    "addAddressToContinue": "يجب إضافة عنوان للمتابعة",
+    "enterAddressDetails": "أدخل تفاصيل العنوان",
+    "governorateAlAsimah": "العاصمة",
+    "governorateHawalli": "حولي",
+    "governorateFarwaniya": "الفروانية",
+    "governorateAhmadi": "الأحمدي",
+    "governorateMubarakAlKabeer": "مبارك الكبير",
+    "governorateJahra": "الجهراء",
+    "currency": "د.ك",
+    "cartIsEmpty": "سلة المشتريات فارغة",
+    "home": "المنزل",
+    "work": "العمل",
+    "pleaseSelectShippingAddress": "الرجاء اختيار عنوان الشحن",
+    "paymentFailed": "فشل الدفع",
+    "invoiceNumber": "رقم الفاتورة",
+    "paymentSuccessful": "تم الدفع بنجاح",
+    "paymentNotConfirmed": "لم يتم تأكيد الدفع",
+    "errorOccurred": "حدث خطأ",
+    "great": "رائع!",
+    "selectShippingAddress": "اختر عنوان الشحن",
+    "pleaseAddOrSelectAddress": "الرجاء إضافة أو اختيار عنوان",
+    "homeAddressDetails": "حولي، قطعة 5، شارع 10، منزل 15",
+    "workAddressDetails": "مدينة الكويت، برج التجارية، الدور 20",
+    "confirmAddress": "تأكيد العنوان",
+    "errorLoadingAddresses": "خطأ في تحميل العناوين",
+    "retry": "إعادة المحاولة",
+    "noAddressAdded": "لم يتم إضافة عنوان",
+    "pleaseAddAddressToContinue": "الرجاء إضافة عنوان للمتابعة",
+    "select": "اختيار",
+    "unknown": "غير معروف",
+    "colorPink": "وردي",
+    "colorWhite": "أبيض",
+    "colorBlue": "أزرق",
+    "colorBlack": "أسود",
+    "colorGreen": "أخضر",
+    "searchForYourFavoriteProducts": "ابحث عن منتجاتك المفضلة...",
+    "shippingCompanyAramex": "شركة الشحن: أرامكس",
+    "orderConfirmed": "تم تأكيد الطلب",
+    "orderReceivedFromStore": "تم استلام الطلب من المتجر",
+    "orderAtSortingCenter": "الطلب في مركز الفرز",
+    "outForDelivery": "جاري التوصيل",
+    "delivered": "تم التوصيل",
+    "deliveryDetails": "تفاصيل التوصيل",
+    "recipientName": "محمد أحمد",
+    "recipientPhoneNumber": "+20 123 456 7890",
+    "recipientAddress": "شارع 123، المعادي، القاهرة",
+    "invalidEmail": "بريد غير صحيح",
+    "passwordTooShort": "كلمة السر قصيرة جدًا",
+    "createAccount": "إنشاء الحساب",
+    "loginNow": "سجل الدخول الآن",
+    "accountCreatedSuccessfully": "تم إنشاء الحساب بنجاح!",
+    "somethingWentWrong": "حدث خطأ ما.",
+    "weakPassword": "كلمة السر ضعيفة جدًا.",
+    "emailAlreadyInUse": "هذا البريد الإلكتروني مستخدم بالفعل.",
+    "failedToCreateAccount": "فشل إنشاء الحساب: ",
+    "appName": "RAVAL",
+    "governorateCairo": "القاهرة",
+    "governorateAlexandria": "الإسكندرية",
+    "governorateGiza": "الجيزة",
+    "governorateMansoura": "المنصورة",
+    "loginToAddBranch": "يجب تسجيل الدخول لإضافة فرع جديد",
+    "branchName": "اسم الفرع",
+    "address": "العنوان",
+    "workingHours": "ساعات العمل",
+    "latitude": "خط العرض",
+    "longitude": "خط الطول",
+    "branchAddedSuccessfully": "تم إضافة الفرع بنجاح",
+    "error": "حدث خطأ: ",
+    "add": "إضافة",
+    "couldNotOpenMap": "لا يمكن فتح الخريطة",
+    "couldNotMakeCall": "لا يمكن إجراء المكالمة",
+    "faqCategoryGeneral": "عام",
+    "faqCategoryOrders": "الطلبات",
+    "faqCategoryShipping": "الشحن",
+    "faqCategoryPayment": "الدفع",
+    "faqCategoryOther": "أخرى",
+    "mockQuestion": "سؤال وهمي {index}؟",
+    "@mockQuestion": {
+        "placeholders": {
+            "index": { "type": "int" }
+        }
+    },
+    "mockAnswer": "هذه إجابة وهمية للسؤال {index}. توفر تفاصيل وحلولاً متعلقة بالسؤال.",
+    "@mockAnswer": {
+        "placeholders": {
+            "index": { "type": "int" }
+        }
+    },
+    "removeFromFavorites": "إزالة من المفضلة",
+    "springDress": "فستان بناتي ربيعي",
+    "springDressDescription": "فستان بناتي رائع مصنوع من أجود أنواع القطن، مناسب لفصل الربيع والخريف. تصميم أنيق بألوان زاهية.",
+    "girls": "بناتي",
+    "dresses": "فساتين",
+    "spring": "ربيعي",
+    "materials": "المواد",
+    "cotton": "قطن",
+    "season": "الموسم",
+    "springAutumn": "ربيع/خريف",
+    "style": "نمط",
+    "casual": "كاجوال",
+    "boysSummerSet": "طقم ولادي صيفي",
+    "boysSummerSetDescription": "طقم ولادي مميز مناسب لفصل الصيف، خامة قطنية مريحة وألوان زاهية",
+    "boys": "ولادي",
+    "summer": "صيفي",
+    "sport": "سبورت",
+    "winterJacket": "جاكيت شتوي",
+    "winterJacketDescription": "جاكيت شتوي دافئ مناسب لفصل الشتاء، بتصميم عصري وخامة ممتازة",
+    "winter": "شتاء",
+    "woolAndPolyester": "صوف وبوليستر",
+    "lining": "البطانة",
+    "lined": "مبطن",
+    "emailExample": "مثال: name@example.com",
+    "pleaseEnterEmail": "الرجاء إدخال البريد الإلكتروني",
+    "atLeast6Chars": "على الأقل 6 أحرف",
+    "pleaseEnterPassword": "الرجاء إدخال كلمة السر",
+    "errorSendingMessage": "حدث خطأ في إرسال الرسالة",
+    "sentAnImage": "📷 تم إرسال صورة",
+    "errorSendingImage": "حدث خطأ في إرسال الصورة",
+    "errorLoadingChat": "حدث خطأ في تحميل المحادثة",
+    "somethingWentWrong": "حدث خطأ ما",
+    "noInternetConnection": "الرجاء التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.",
+    "retry": "إعادة المحاولة"
 }

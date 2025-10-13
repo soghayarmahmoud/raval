@@ -1,5 +1,6 @@
 // In lib/screens/shipping_tracking_page.dart
 import 'package:flutter/material.dart';
+import 'package:store/l10n/app_localizations.dart';
 import 'package:store/theme.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
@@ -8,38 +9,40 @@ class ShippingTrackingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('تتبع الشحنة'),
+        title: Text(loc.trackShipment),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildOrderInfo(),
+            _buildOrderInfo(context),
             const SizedBox(height: 24),
             _buildTrackingTimeline(context),
             const SizedBox(height: 24),
-            _buildDeliveryDetails(),
+            _buildDeliveryDetails(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildOrderInfo() {
+  Widget _buildOrderInfo(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'رقم التتبع',
+                  loc.trackingNumber,
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 Text(
@@ -53,11 +56,11 @@ class ShippingTrackingPage extends StatelessWidget {
               ],
             ),
             const Divider(height: 24),
-            const Row(
+            Row(
               children: [
                 Icon(Icons.local_shipping_outlined),
                 SizedBox(width: 8),
-                Text('شركة الشحن: أرامكس'),
+                Text(loc.shippingCompanyAramex),
               ],
             ),
             const SizedBox(height: 8),
@@ -66,7 +69,7 @@ class ShippingTrackingPage extends StatelessWidget {
                 const Icon(Icons.access_time),
                 const SizedBox(width: 8),
                 Text(
-                  'الوقت المتوقع للتوصيل: ${_getEstimatedDeliveryTime()}',
+                  '${loc.estimatedDelivery}: ${_getEstimatedDeliveryTime()}',
                 ),
               ],
             ),
@@ -77,33 +80,34 @@ class ShippingTrackingPage extends StatelessWidget {
   }
 
   Widget _buildTrackingTimeline(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final trackingSteps = [
       {
-        'title': 'تم تأكيد الطلب',
+        'title': loc.orderConfirmed,
         'time': '9:30 ص',
         'date': '11 أكتوبر 2025',
         'isCompleted': true,
       },
       {
-        'title': 'تم استلام الطلب من المتجر',
+        'title': loc.orderReceivedFromStore,
         'time': '2:15 م',
         'date': '11 أكتوبر 2025',
         'isCompleted': true,
       },
       {
-        'title': 'الطلب في مركز الفرز',
+        'title': loc.orderAtSortingCenter,
         'time': '6:45 م',
         'date': '11 أكتوبر 2025',
         'isCompleted': true,
       },
       {
-        'title': 'جاري التوصيل',
+        'title': loc.outForDelivery,
         'time': '10:30 ص',
         'date': '12 أكتوبر 2025',
         'isCompleted': false,
       },
       {
-        'title': 'تم التوصيل',
+        'title': loc.delivered,
         'time': '-',
         'date': '-',
         'isCompleted': false,
@@ -116,8 +120,8 @@ class ShippingTrackingPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'تتبع الشحنة',
+            Text(
+              loc.trackShipment,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -185,15 +189,16 @@ class ShippingTrackingPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDeliveryDetails() {
+  Widget _buildDeliveryDetails(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'تفاصيل التوصيل',
+            Text(
+              loc.deliveryDetails,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -202,20 +207,20 @@ class ShippingTrackingPage extends StatelessWidget {
             const SizedBox(height: 16),
             _buildDetailRow(
               icon: Icons.person_outline,
-              title: 'المستلم',
-              value: 'محمد أحمد',
+              title: loc.recipient,
+              value: loc.recipientName,
             ),
             const SizedBox(height: 12),
             _buildDetailRow(
               icon: Icons.phone_outlined,
-              title: 'رقم الهاتف',
-              value: '+20 123 456 7890',
+              title: loc.phoneNumber,
+              value: loc.recipientPhoneNumber,
             ),
             const SizedBox(height: 12),
             _buildDetailRow(
               icon: Icons.location_on_outlined,
-              title: 'عنوان التوصيل',
-              value: 'شارع 123، المعادي، القاهرة',
+              title: loc.deliveryAddress,
+              value: loc.recipientAddress,
             ),
           ],
         ),

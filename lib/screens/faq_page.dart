@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:store/l10n/app_localizations.dart';
 import '../models/faq_model.dart';
 import '../services/faq_service.dart';
-import 'package:provider/provider.dart';
-import '../providers/locale_provider.dart';
 
 class FAQPage extends StatefulWidget {
   const FAQPage({super.key});
@@ -16,21 +15,21 @@ class _FAQPageState extends State<FAQPage> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   String? _selectedCategory;
-  final List<String> _categories = [
-    'general',
-    'orders',
-    'shipping',
-    'payment',
-    'other'
-  ];
 
   @override
   Widget build(BuildContext context) {
-    final locale = Provider.of<LocaleProvider>(context).locale;
+    final loc = AppLocalizations.of(context)!;
+    final List<String> _categories = [
+      loc.faqCategoryGeneral,
+      loc.faqCategoryOrders,
+      loc.faqCategoryShipping,
+      loc.faqCategoryPayment,
+      loc.faqCategoryOther
+    ];
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('الأسئلة الشائعة'),
+        title: Text(loc.faq),
       ),
       body: Column(
         children: [
@@ -38,11 +37,10 @@ class _FAQPageState extends State<FAQPage> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                // Search bar
                 TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'البحث في الأسئلة الشائعة...',
+                    hintText: loc.searchInFAQ,
                     prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -57,13 +55,12 @@ class _FAQPageState extends State<FAQPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Category filter
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
                       FilterChip(
-                        label: const Text('الكل'),
+                        label: Text(loc.all),
                         selected: _selectedCategory == null,
                         onSelected: (bool selected) {
                           setState(() {
@@ -94,14 +91,14 @@ class _FAQPageState extends State<FAQPage> {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: 5, // Display 5 mock FAQs
+              itemCount: 5,
               padding: const EdgeInsets.all(16),
               itemBuilder: (context, index) {
                 final faq = FAQModel(
                   id: 'mock-$index',
-                  question: 'Mock Question $index?',
+                  question: loc.mockQuestion(index),
                   answer:
-                      'This is a mock answer for question $index. It provides details and solutions related to the question.',
+                      loc.mockAnswer(index),
                   order: index,
                   category: 'general',
                   translations: {},
@@ -110,7 +107,7 @@ class _FAQPageState extends State<FAQPage> {
                   margin: const EdgeInsets.only(bottom: 16),
                   child: ExpansionTile(
                     title: Text(
-                      faq.getQuestion(locale.languageCode),
+                      faq.question,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -120,7 +117,7 @@ class _FAQPageState extends State<FAQPage> {
                       Padding(
                         padding: const EdgeInsets.all(16),
                         child: Text(
-                          faq.getAnswer(locale.languageCode),
+                          faq.answer,
                           style: TextStyle(
                             color: Theme.of(context).textTheme.bodyLarge?.color,
                             height: 1.5,

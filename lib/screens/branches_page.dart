@@ -1,6 +1,7 @@
 // In lib/screens/branches_page.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:store/l10n/app_localizations.dart';
 import 'package:store/theme.dart';
 import 'package:store/services/location_service.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,13 +16,7 @@ class BranchesPage extends StatefulWidget {
 
 class _BranchesPageState extends State<BranchesPage> {
   final LocationService _locationService = LocationService();
-  String _selectedGovernorate = 'القاهرة';
-  final List<String> _governorates = [
-    'القاهرة',
-    'الإسكندرية',
-    'الجيزة',
-    'المنصورة',
-  ];
+  String? _selectedGovernorate;
   
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
@@ -42,11 +37,12 @@ class _BranchesPageState extends State<BranchesPage> {
   }
 
   Future<void> _addNewBranch() async {
+    final loc = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('يجب تسجيل الدخول لإضافة فرع جديد'),
+        SnackBar(
+          content: Text(loc.loginToAddBranch),
           backgroundColor: Colors.red,
         ),
       );
@@ -56,36 +52,36 @@ class _BranchesPageState extends State<BranchesPage> {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('إضافة فرع جديد'),
+        title: Text(loc.addBranch),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: 'اسم الفرع'),
+                decoration: InputDecoration(labelText: loc.branchName),
               ),
               TextField(
                 controller: _addressController,
-                decoration: const InputDecoration(labelText: 'العنوان'),
+                decoration: InputDecoration(labelText: loc.address),
               ),
               TextField(
                 controller: _phoneController,
-                decoration: const InputDecoration(labelText: 'رقم الهاتف'),
+                decoration: InputDecoration(labelText: loc.phoneNumber),
                 keyboardType: TextInputType.phone,
               ),
               TextField(
                 controller: _hoursController,
-                decoration: const InputDecoration(labelText: 'ساعات العمل'),
+                decoration: InputDecoration(labelText: loc.workingHours),
               ),
               TextField(
                 controller: _latitudeController,
-                decoration: const InputDecoration(labelText: 'خط العرض'),
+                decoration: InputDecoration(labelText: loc.latitude),
                 keyboardType: TextInputType.number,
               ),
               TextField(
                 controller: _longitudeController,
-                decoration: const InputDecoration(labelText: 'خط الطول'),
+                decoration: InputDecoration(labelText: loc.longitude),
                 keyboardType: TextInputType.number,
               ),
             ],
@@ -94,7 +90,7 @@ class _BranchesPageState extends State<BranchesPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
+            child: Text(loc.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -106,7 +102,7 @@ class _BranchesPageState extends State<BranchesPage> {
                   workingHours: _hoursController.text,
                   latitude: double.parse(_latitudeController.text),
                   longitude: double.parse(_longitudeController.text),
-                  governorate: _selectedGovernorate,
+                  governorate: _selectedGovernorate!,
                   isCustom: true,
                   userId: user.uid,
                 );
@@ -116,10 +112,9 @@ class _BranchesPageState extends State<BranchesPage> {
                 if (!mounted) return;
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('تم إضافة الفرع بنجاح')),
+                  SnackBar(content: Text(loc.branchAddedSuccessfully)),
                 );
 
-                // Clear the form
                 _nameController.clear();
                 _addressController.clear();
                 _phoneController.clear();
@@ -129,13 +124,13 @@ class _BranchesPageState extends State<BranchesPage> {
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('حدث خطأ: ${e.toString()}'),
+                    content: Text('${loc.error}${e.toString()}'),
                     backgroundColor: Colors.red,
                   ),
                 );
               }
             },
-            child: const Text('إضافة'),
+            child: Text(loc.add),
           ),
         ],
       ),
@@ -144,9 +139,15 @@ class _BranchesPageState extends State<BranchesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    final List<String> _governorates = [loc.governorateCairo, loc.governorateAlexandria, loc.governorateGiza, loc.governorateMansoura];
+    if (_selectedGovernorate == null) {
+      _selectedGovernorate = _governorates.first;
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('عناوين الفروع'),
+        title: Text(loc.branchAddresses),
         actions: [
           IconButton(
             icon: const Icon(Icons.add_location_alt_outlined),
@@ -156,14 +157,14 @@ class _BranchesPageState extends State<BranchesPage> {
       ),
       body: Column(
         children: [
-          _buildGovernorateSelector(),
+          _buildGovernorateSelector(_governorates),
           Expanded(
             child: StreamBuilder<List<BranchLocation>>(
-              stream: _locationService.getBranchesByGovernorate(_selectedGovernorate),
+              stream: _locationService.getBranchesByGovernorate(_selectedGovernorate!),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return Center(
-                    child: Text('حدث خطأ: ${snapshot.error}'),
+                    child: Text('${loc.error}${snapshot.error}'),
                   );
                 }
 
@@ -181,7 +182,8 @@ class _BranchesPageState extends State<BranchesPage> {
     );
   }
 
-  Widget _buildGovernorateSelector() {
+  Widget _buildGovernorateSelector(List<String> _governorates) {
+    final loc = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -196,8 +198,8 @@ class _BranchesPageState extends State<BranchesPage> {
       ),
       child: DropdownButtonFormField<String>(
         value: _selectedGovernorate,
-        decoration: const InputDecoration(
-          labelText: 'اختر المحافظة',
+        decoration: InputDecoration(
+          labelText: loc.selectGovernorate,
           border: OutlineInputBorder(),
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         ),
@@ -214,6 +216,7 @@ class _BranchesPageState extends State<BranchesPage> {
   }
 
   Widget _buildBranchesList(List<BranchLocation> branches) {
+    final loc = AppLocalizations.of(context)!;
     if (branches.isEmpty) {
       return Center(
         child: Column(
@@ -223,7 +226,7 @@ class _BranchesPageState extends State<BranchesPage> {
                 size: 64, color: Colors.grey.shade400),
             const SizedBox(height: 16),
             Text(
-              'لا توجد فروع في ${_selectedGovernorate}',
+              loc.noBranchesIn(_selectedGovernorate!),
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.grey.shade600,
@@ -272,7 +275,7 @@ class _BranchesPageState extends State<BranchesPage> {
                     Expanded(
                       child: OutlinedButton.icon(
                         icon: const Icon(Icons.map_outlined),
-                        label: const Text('فتح الخريطة'),
+                        label: Text(loc.openMap),
                         onPressed: () => _openMap(branch),
                       ),
                     ),
@@ -280,7 +283,7 @@ class _BranchesPageState extends State<BranchesPage> {
                     Expanded(
                       child: ElevatedButton.icon(
                         icon: const Icon(Icons.phone),
-                        label: const Text('اتصال'),
+                        label: Text(loc.call),
                         onPressed: () => _makePhoneCall(branch.phone),
                       ),
                     ),
@@ -295,6 +298,7 @@ class _BranchesPageState extends State<BranchesPage> {
   }
 
   Widget _buildInfoRow(IconData icon, String text, {bool isPhone = false}) {
+    final loc = AppLocalizations.of(context)!;
     return Row(
       children: [
         Icon(icon, size: 20, color: Colors.grey),
@@ -322,6 +326,7 @@ class _BranchesPageState extends State<BranchesPage> {
   }
 
   Future<void> _openMap(BranchLocation branch) async {
+    final loc = AppLocalizations.of(context)!;
     final url =
         'https://www.google.com/maps/search/?api=1&query=${branch.latitude},${branch.longitude}';
     if (await canLaunch(url)) {
@@ -329,19 +334,20 @@ class _BranchesPageState extends State<BranchesPage> {
     } else {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open the map')),
+        SnackBar(content: Text(loc.couldNotOpenMap)),
       );
     }
   }
 
   Future<void> _makePhoneCall(String phoneNumber) async {
+    final loc = AppLocalizations.of(context)!;
     final url = 'tel:$phoneNumber';
     if (await canLaunch(url)) {
       await launch(url);
     } else {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not make the call')),
+        SnackBar(content: Text(loc.couldNotMakeCall)),
       );
     }
   }

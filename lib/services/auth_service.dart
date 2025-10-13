@@ -1,8 +1,13 @@
 // lib/services/auth_service.dart
 
+import 'dart:convert';
+import 'dart:math';
+import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class AuthService {
   // Keys for saving user data locally
@@ -11,6 +16,7 @@ class AuthService {
   static const String _userPhoneKey = 'userPhone';
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   // Stream to listen for authentication state changes throughout the app
   Stream<User?> get authStateChanges => _auth.authStateChanges();
@@ -39,7 +45,7 @@ class AuthService {
   Future<void> signOut() async {
     try {
       // 1. Sign out from Google first (if the user was signed in with it)
-      await GoogleSignIn.instance.signOut();
+      await _googleSignIn.signOut();
 
       // 2. Sign out from Firebase (applies to all sign-in methods)
       await _auth.signOut();
@@ -75,5 +81,55 @@ class AuthService {
   Future<String?> getUserName() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_userNameKey);
+  }
+
+  Future<UserCredential?> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+      if (googleUser == null) {
+        return null; // User canceled the sign-in
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      return await _auth.signInWithCredential(credential);
+    } catch (e) {
+      debugPrint('Error during Google Sign-In: $e');
+      rethrow;
+    }
+  }
+
+  Future<UserCredential?> signInWithApple() async {
+    final rawNonce = _generateNonce();
+    final nonce = sha256.convert(utf8.encode(rawNonce)).toString();
+
+    try {
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [AppleIDAuthorizationScopes.email, AppleIDAuthorizationScopes.fullName],
+        nonce: nonce,
+      );
+
+      final oauthCredential = OAuthProvider('apple.com').credential(
+        idToken: appleCredential.identityToken,
+        rawNonce: rawNonce,
+      );
+
+      return await _auth.signInWithCredential(oauthCredential);
+    } catch (e) {
+      debugPrint('Error during Apple Sign-In: $e');
+      rethrow;
+    }
+  }
+
+  String _generateNonce([int length = 32]) {
+    const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(length, (_) => charset[random.nextInt(charset.length)]).join();
   }
 }

@@ -26,6 +26,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
 
   Future<void> _submitForm() async {
+    final loc = AppLocalizations.of(context)!;
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
@@ -194,12 +195,12 @@ class _LoginPageState extends State<LoginPage> {
                         labelText: loc.email_hint,
                         prefixIcon: Icon(Icons.email_outlined),
                         border: OutlineInputBorder(),
-                        helperText: 'مثال: name@example.com',
+                        helperText: loc.emailExample,
                       ),
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'الرجاء إدخال البريد الإلكتروني';
+                          return loc.pleaseEnterEmail;
                         }
                         final emailError = _authService.validateEmail(value);
                         if (emailError != null) {
@@ -217,11 +218,11 @@ class _LoginPageState extends State<LoginPage> {
                         labelText: loc.password_hint,
                         prefixIcon: Icon(Icons.lock_outline),
                         border: OutlineInputBorder(),
-                        helperText: 'على الأقل 6 أحرف',
+                        helperText: loc.atLeast6Chars,
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'الرجاء إدخال كلمة السر';
+                          return loc.pleaseEnterPassword;
                         }
                         final passwordError =
                             _authService.validatePassword(value);
@@ -247,7 +248,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 24),
-              _buildDivider(), // --- الفاصل ---
+              _buildDivider(context), // --- الفاصل ---
               const SizedBox(height: 24),
 
               // --- قسم الدخول عبر الشبكات الاجتماعية ---
@@ -285,13 +286,14 @@ class _LoginPageState extends State<LoginPage> {
 
 // --- ويدجتس مساعدة للتصميم العصري ---
 
-Widget _buildDivider() {
-  return const Row(
+Widget _buildDivider(BuildContext context) {
+  final loc = AppLocalizations.of(context)!;
+  return Row(
     children: [
       Expanded(child: Divider()),
       Padding(
         padding: EdgeInsets.symmetric(horizontal: 12.0),
-        child: Text('أو', style: TextStyle(color: Colors.grey)),
+        child: Text(loc.or, style: TextStyle(color: Colors.grey)),
       ),
       Expanded(child: Divider()),
     ],

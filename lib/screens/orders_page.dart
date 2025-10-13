@@ -1,4 +1,6 @@
 // In lib/screens/orders_page.dart
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:store/l10n/app_localizations.dart';
 import 'package:store/theme.dart';
@@ -13,12 +15,11 @@ class OrdersPage extends StatefulWidget {
 class _OrdersPageState extends State<OrdersPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final List<String> _tabs = ['جاري التنفيذ', 'مكتمل', 'ملغي'];
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _tabs.length, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -30,10 +31,12 @@ class _OrdersPageState extends State<OrdersPage>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context)!;
+    final List<String> _tabs = [loc.activeOrders, loc.completedOrders, loc.cancelledOrders];
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('طلباتي'),
+        title: Text(loc.myOrders),
         bottom: TabBar(
           controller: _tabController,
           tabs: _tabs.map((tab) => Tab(text: tab)).toList(),
@@ -54,6 +57,7 @@ class _OrdersPageState extends State<OrdersPage>
   }
 
   Widget _buildOrdersList(String status) {
+    final loc = AppLocalizations.of(context)!;
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: 5, // Replace with actual orders count
@@ -69,34 +73,34 @@ class _OrdersPageState extends State<OrdersPage>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'رقم الطلب: #${1000 + index}',
+                      loc.orderNumber((1000 + index).toString()),
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     _buildStatusChip(status),
                   ],
                 ),
                 const Divider(height: 24),
-                const Row(
+                Row(
                   children: [
                     Icon(Icons.calendar_today, size: 16),
                     SizedBox(width: 8),
-                    Text('تاريخ الطلب: 11 أكتوبر 2025'),
+                    Text(loc.orderDate("11 October 2025")),
                   ],
                 ),
                 const SizedBox(height: 8),
-                const Row(
+                Row(
                   children: [
                     Icon(Icons.shopping_bag_outlined, size: 16),
                     SizedBox(width: 8),
-                    Text('عدد المنتجات: 3'),
+                    Text(loc.productsNo(3)),
                   ],
                 ),
                 const SizedBox(height: 8),
-                const Row(
+                Row(
                   children: [
                     Icon(Icons.attach_money, size: 16),
                     SizedBox(width: 8),
-                    Text('المبلغ الإجمالي: 150.00 EGP'),
+                    Text(loc.totalPriceValue("150.00")),
                   ],
                 ),
                 const Divider(height: 24),
@@ -105,7 +109,7 @@ class _OrdersPageState extends State<OrdersPage>
                   children: [
                     TextButton.icon(
                       icon: const Icon(Icons.visibility_outlined),
-                      label: const Text('تفاصيل الطلب'),
+                      label: Text(loc.orderDetails),
                       onPressed: () {
                         // Navigate to order details
                       },
@@ -114,7 +118,7 @@ class _OrdersPageState extends State<OrdersPage>
                       TextButton.icon(
                         icon: const Icon(Icons.cancel_outlined,
                             color: Colors.red),
-                        label: const Text('إلغاء الطلب',
+                        label: Text(loc.cancelOrder,
                             style: TextStyle(color: Colors.red)),
                         onPressed: () {
                           // Show cancel confirmation dialog
@@ -131,25 +135,26 @@ class _OrdersPageState extends State<OrdersPage>
   }
 
   Widget _buildStatusChip(String status) {
+    final loc = AppLocalizations.of(context)!;
     Color color;
     String label;
 
     switch (status) {
       case 'active':
         color = AppColors.accentTeal;
-        label = 'جاري التنفيذ';
+        label = loc.activeOrders;
         break;
       case 'completed':
         color = Colors.green;
-        label = 'مكتمل';
+        label = loc.completedOrders;
         break;
       case 'cancelled':
         color = Colors.red;
-        label = 'ملغي';
+        label = loc.cancelledOrders;
         break;
       default:
         color = Colors.grey;
-        label = 'غير معروف';
+        label = loc.unknown;
     }
 
     return Chip(

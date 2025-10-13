@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:store/l10n/app_localizations.dart';
 import '../models/support_chat_model.dart';
 import '../services/support_chat_service.dart';
 
@@ -30,6 +31,7 @@ class _SupportChatPageState extends State<SupportChatPage> {
   }
 
   Future<void> _sendMessage() async {
+    final loc = AppLocalizations.of(context)!;
     if (_messageController.text.trim().isEmpty || _currentTicket == null) {
       return;
     }
@@ -41,7 +43,7 @@ class _SupportChatPageState extends State<SupportChatPage> {
       _messageController.clear();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('حدث خطأ في إرسال الرسالة')),
+        SnackBar(content: Text(loc.errorSendingMessage)),
       );
     } finally {
       setState(() => _isSending = false);
@@ -49,6 +51,7 @@ class _SupportChatPageState extends State<SupportChatPage> {
   }
 
   Future<void> _sendImage() async {
+    final loc = AppLocalizations.of(context)!;
     if (_currentTicket == null) return;
 
     final XFile? image =
@@ -57,7 +60,6 @@ class _SupportChatPageState extends State<SupportChatPage> {
 
     setState(() => _isSending = true);
     try {
-      // Upload image to Firebase Storage
       final ref = FirebaseStorage.instance
           .ref()
           .child('support_chat')
@@ -67,12 +69,11 @@ class _SupportChatPageState extends State<SupportChatPage> {
       await ref.putFile(File(image.path));
       final imageUrl = await ref.getDownloadURL();
 
-      // Send message with image
-      await _chatService.sendMessage(_currentTicket!.id, '📷 Sent an image',
+      await _chatService.sendMessage(_currentTicket!.id, loc.sentAnImage,
           imageUrl: imageUrl);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('حدث خطأ في إرسال الصورة')),
+        SnackBar(content: Text(loc.errorSendingImage)),
       );
     } finally {
       setState(() => _isSending = false);
@@ -81,9 +82,10 @@ class _SupportChatPageState extends State<SupportChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('خدمة العملاء'),
+        title: Text(loc.customerService),
         actions: [
           if (_currentTicket != null && !_currentTicket!.isResolved)
             IconButton(
@@ -92,16 +94,16 @@ class _SupportChatPageState extends State<SupportChatPage> {
                 final confirm = await showDialog<bool>(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: const Text('إنهاء المحادثة'),
-                    content: const Text('هل أنت متأكد من إنهاء المحادثة؟'),
+                    title: Text(loc.endConversation),
+                    content: Text(loc.endConversationConfirm),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context, false),
-                        child: const Text('إلغاء'),
+                        child: Text(loc.cancel),
                       ),
                       TextButton(
                         onPressed: () => Navigator.pop(context, true),
-                        child: const Text('إنهاء'),
+                        child: Text(loc.end),
                       ),
                     ],
                   ),
@@ -128,14 +130,14 @@ class _SupportChatPageState extends State<SupportChatPage> {
                 children: [
                   const Icon(Icons.error_outline, size: 48, color: Colors.red),
                   const SizedBox(height: 16),
-                  const Text('حدث خطأ في تحميل المحادثة'),
+                  Text(loc.errorLoadingChat),
                   TextButton(
                     onPressed: () {
                       setState(() {
                         _ticketFuture = _chatService.getOrCreateTicket();
                       });
                     },
-                    child: const Text('إعادة المحاولة'),
+                    child: Text(loc.retry),
                   ),
                 ],
               ),
@@ -157,8 +159,8 @@ class _SupportChatPageState extends State<SupportChatPage> {
                     final messages = snapshot.data ?? [];
 
                     if (messages.isEmpty) {
-                      return const Center(
-                        child: Text('ابدأ محادثتك مع خدمة العملاء'),
+                      return Center(
+                        child: Text(loc.startConversationHint),
                       );
                     }
 
@@ -259,7 +261,7 @@ class _SupportChatPageState extends State<SupportChatPage> {
                         child: TextField(
                           controller: _messageController,
                           decoration: InputDecoration(
-                            hintText: 'اكتب رسالتك هنا...',
+                            hintText: loc.writeYourMessage,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),

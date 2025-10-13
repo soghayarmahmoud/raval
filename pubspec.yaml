@@ -21,10 +21,12 @@ dependencies:
   flutter_local_notifications: ^17.2.1
   flutter_localization: ^0.3.3
   flutter_map: ^8.2.2
+  font_awesome_flutter: ^10.10.0
   geolocator: ^14.0.2
   google_sign_in: ^7.2.0
   image_picker: ^1.2.0
   latlong2: ^0.9.1
+  lottie: ^3.1.2
   myfatoorah_flutter: ^3.1.0
   photo_view: ^0.15.0
   provider: ^6.1.5+1
@@ -34,7 +36,7 @@ dependencies:
   url_launcher: ^6.3.2
 
 dev_dependencies:
-  flutter_lints: ^3.0.0 # تم تعديل الإصدار ليكون متوافقًا بشكل عام
+  flutter_lints: ^3.0.0 
   flutter_test:
     sdk: flutter
 
@@ -46,6 +48,8 @@ flutter:
     - assets/fonts/
     - assets/images/
     - assets/icons/
+    - assets/images/loading_animation.json
+    - assets/images/error.png
 
   fonts:
     - family: Exo2

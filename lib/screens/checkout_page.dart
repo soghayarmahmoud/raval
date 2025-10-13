@@ -1,9 +1,11 @@
 // In lib/screens/checkout_page.dart
 import 'package:flutter/material.dart';
 import 'package:myfatoorah_flutter/myfatoorah_flutter.dart';
+import 'package:store/l10n/app_localizations.dart';
 import 'package:store/models/cart_item_model.dart';
 import 'package:store/models/address_model.dart';
 import 'package:store/services/cart_service.dart';
+import 'package:store/screens/add_address_page.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -20,10 +22,7 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
-  final List<AddressModel> _userAddresses = [
-    AddressModel(id: '1', name: 'المنزل', details: 'حولي، قطعة 5، شارع 10، منزل 15', governorate: ''),
-    AddressModel(id: '2', name: 'العمل', details: 'مدينة الكويت، برج التجارية، الدور 20', governorate: ''),
-  ];
+  late List<AddressModel> _userAddresses;
   AddressModel? _selectedAddress;
   
   double _subtotal = 0;
@@ -33,7 +32,6 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
   void initState() {
     super.initState();
     _loadCheckoutData();
-    _selectedAddress = _userAddresses.isNotEmpty ? _userAddresses.first : null;
     
     _animationController = AnimationController(
       vsync: this,
@@ -42,12 +40,22 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
     _fadeAnimation = CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
     _animationController.forward();
 
-    // Initialize MyFatoorah - Add your API token later
     MyFatoorahFlutter.instance.init(
       'rLtt6JWvbU-wNJBlEK-BB_gSAc_wL-dQzVsq7MCTeP1_kaLFeJB0bA92G5NioM7qrONj5bTksLmafbq0A0LIKcwU_fL4a1gSt4dYFVVPVGP-CMAaGb6d3o8G4C6mMuiQz0jAZ7LDEF_rI9y9VlkCliH3PJj_9go_N_1ISGpmbu5Cdx_ug0WxE_26z21upG2_N0G_p4B2DRTAcc_Gk7GDU6_pL8gJzVp9p4VlL8N1jMAA-g6_2rE1s3a_b3y3a_p', // TODO: Replace with your actual API token
       MFCountry.KUWAIT,
       MFEnvironment.TEST,
     );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final loc = AppLocalizations.of(context)!;
+    _userAddresses = [
+      AddressModel(id: '1', name: loc.home, details: loc.homeAddressDetails, governorate: ''),
+      AddressModel(id: '2', name: loc.work, details: loc.workAddressDetails, governorate: ''),
+    ];
+    _selectedAddress ??= _userAddresses.isNotEmpty ? _userAddresses.first : null;
   }
 
   @override
@@ -59,16 +67,19 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
   Future<void> _loadCheckoutData() async {
     final items = await _cartService.getCartItems();
     double sum = items.fold(0, (prev, item) => prev + (item.product.price * item.quantity));
-    setState(() {
-      _cartItems = items;
-      _subtotal = sum;
-      _isLoading = false;
-    });
+    if(mounted) {
+      setState(() {
+        _cartItems = items;
+        _subtotal = sum;
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _handlePayment() async {
+    final loc = AppLocalizations.of(context)!;
     if (_selectedAddress == null) {
-      _showSnackBar('الرجاء اختيار عنوان للشحن أولاً', Icons.location_off, Colors.orange);
+      _showSnackBar(loc.pleaseSelectShippingAddress, Icons.location_off, Colors.orange);
       return;
     }
     
@@ -82,20 +93,28 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
     );
 
     try {
+      // --- START OF FIX ---
+      // The executePayment function expects 3 positional arguments, not named ones.
       final response = await MyFatoorahFlutter.instance.executePayment(
-        request,
-        'https://your-success-url.com', // TODO: replace with your real success/return URL
-        'https://your-error-url.com' as Function(String invoiceId)?,   // TODO: replace with your real error/cancel URL
+        request, // 1st argument: The payment request
+        'https://www.success.com', // 2nd argument: Success URL
+        (invoiceId) { // 3rd argument: Failure callback
+          // This callback is triggered by MyFatoorah on failure (e.g., user cancellation)
+          _showErrorDialog(loc.paymentFailed, "${loc.invoiceNumber}: $invoiceId");
+        },
       );
-
+      
+      // After the await, we handle the successful response
       final status = response.invoiceStatus?.toString().toLowerCase() ?? '';
       if (status.contains('paid')) {
-        _showSuccessDialog('عملية الدفع تمت بنجاح!', 'رقم الفاتورة: ${response.invoiceId}');
+        _showSuccessDialog(loc.paymentSuccessful, '${loc.invoiceNumber}: ${response.invoiceId}');
       } else {
-        _showErrorDialog('فشلت عملية الدفع', 'لم يتم تأكيد الدفع.');
+        // This part might be reached if the payment is pending or has another status
+        _showErrorDialog(loc.paymentFailed, loc.paymentNotConfirmed);
       }
-        } catch (e) {
-      _showErrorDialog('حدث خطأ', e.toString());
+      // --- END OF FIX ---
+    } catch (e) {
+      _showErrorDialog(loc.errorOccurred, e.toString());
     } finally {
        if (mounted) {
          setState(() => _isProcessingPayment = false);
@@ -104,6 +123,7 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
   }
 
   void _showSnackBar(String message, IconData icon, Color color) {
+    if(!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -122,6 +142,7 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
   }
 
   void _showSuccessDialog(String title, String message) {
+    final loc = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -157,14 +178,14 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    Navigator.of(context).pop(); // Return to previous screen
+                    Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green.shade600,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('رائع!', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  child: Text(loc.great, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
@@ -175,6 +196,7 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
   }
 
   void _showErrorDialog(String title, String message) {
+    final loc = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -214,7 +236,7 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('حسناً', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  child: Text(loc.ok, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
@@ -225,6 +247,7 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
   }
 
   void _showAddressSelector() {
+    final loc = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -242,9 +265,9 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'اختر عنوان الشحن',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                Text(
+                  loc.selectShippingAddress,
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
@@ -260,10 +283,10 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
               child: OutlinedButton.icon(
                 onPressed: () {
                   Navigator.pop(context);
-                  // TODO: Navigate to add address page
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const AddAddressPage()));
                 },
                 icon: const Icon(Icons.add),
-                label: const Text('إضافة عنوان جديد'),
+                label: Text(loc.addNewAddress),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -332,12 +355,13 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
-        title: const Text('إتمام الطلب', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+        title: Text(loc.checkout, style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
         iconTheme: const IconThemeData(color: Colors.black87),
       ),
       body: _isLoading
@@ -364,13 +388,14 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
   }
 
   Widget _buildAddressSection() {
+    final loc = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withAlpha(13),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -392,9 +417,9 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
                   child: Icon(Icons.local_shipping, color: Colors.blue.shade600),
                 ),
                 const SizedBox(width: 12),
-                const Text(
-                  'عنوان الشحن',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  loc.shippingAddress,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -411,13 +436,13 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
               child: Icon(Icons.location_on, color: Colors.green.shade600, size: 24),
             ),
             title: Text(
-              _selectedAddress?.name ?? 'لا يوجد عنوان محدد',
+              _selectedAddress?.name ?? loc.noAddressSelected,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             subtitle: Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                _selectedAddress?.details ?? 'الرجاء إضافة أو اختيار عنوان',
+                _selectedAddress?.details ?? loc.pleaseAddOrSelectAddress,
                 style: TextStyle(color: Colors.grey.shade600),
               ),
             ),
@@ -427,7 +452,7 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
                 foregroundColor: Colors.blue.shade600,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               ),
-              child: const Text('تغيير', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(loc.change, style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ),
         ],
@@ -436,13 +461,14 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
   }
 
   Widget _buildOrderSummarySection() {
+    final loc = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withAlpha(13),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -464,9 +490,9 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
                   child: Icon(Icons.shopping_bag, color: Colors.purple.shade600),
                 ),
                 const SizedBox(width: 12),
-                const Text(
-                  'ملخص الطلب',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  loc.orderSummary,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 Container(
@@ -476,7 +502,7 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    '${_cartItems.length} منتج',
+                    loc.productsCount(_cartItems.length),
                     style: TextStyle(
                       color: Colors.orange.shade700,
                       fontWeight: FontWeight.bold,
@@ -504,7 +530,7 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withAlpha(26),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -542,7 +568,7 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              'الكمية: ${item.quantity}',
+                              '${loc.quantity}: ${item.quantity}',
                               style: TextStyle(
                                 fontSize: 13,
                                 color: Colors.grey.shade700,
@@ -555,7 +581,7 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      '${(item.product.price * item.quantity).toStringAsFixed(3)} د.ك',
+                      '${(item.product.price * item.quantity).toStringAsFixed(3)} ${loc.currency}',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
@@ -573,6 +599,7 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
   }
 
   Widget _buildPriceDetailsSection() {
+    final loc = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -583,7 +610,7 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.3),
+            color: Colors.blue.withAlpha(77),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -593,9 +620,9 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            _priceRow('مجموع المنتجات', '${_subtotal.toStringAsFixed(3)} د.ك', isWhite: true),
+            _priceRow(loc.subtotal, '${_subtotal.toStringAsFixed(3)} ${loc.currency}', isWhite: true),
             const SizedBox(height: 12),
-            _priceRow('رسوم الشحن', '${_shippingFee.toStringAsFixed(3)} د.ك', isWhite: true),
+            _priceRow(loc.shippingFee, '${_shippingFee.toStringAsFixed(3)} ${loc.currency}', isWhite: true),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16),
               child: Container(
@@ -603,17 +630,17 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Colors.white.withOpacity(0.1),
-                      Colors.white.withOpacity(0.5),
-                      Colors.white.withOpacity(0.1),
+                      Colors.white.withAlpha(26),
+                      Colors.white.withAlpha(128),
+                      Colors.white.withAlpha(26),
                     ],
                   ),
                 ),
               ),
             ),
             _priceRow(
-              'المبلغ الإجمالي',
-              '${(_subtotal + _shippingFee).toStringAsFixed(3)} د.ك',
+              loc.totalAmount,
+              '${(_subtotal + _shippingFee).toStringAsFixed(3)} ${loc.currency}',
               isTotal: true,
               isWhite: true,
             ),
@@ -640,13 +667,14 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
 
   Widget _buildCheckoutButton() {
     if (_cartItems.isEmpty) return const SizedBox.shrink();
+    final loc = AppLocalizations.of(context)!;
     
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withAlpha(26),
             blurRadius: 20,
             offset: const Offset(0, -5),
           ),
@@ -655,10 +683,7 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: _isProcessingPayment
-            ? Container(
-                padding: const EdgeInsets.all(20),
-                child: const Center(child: CircularProgressIndicator()),
-              )
+            ? const Center(child: CircularProgressIndicator())
             : Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -667,7 +692,7 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.green.withOpacity(0.4),
+                      color: Colors.green.withAlpha(102),
                       blurRadius: 12,
                       offset: const Offset(0, 6),
                     ),
@@ -678,16 +703,16 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
                   child: InkWell(
                     onTap: _handlePayment,
                     borderRadius: BorderRadius.circular(16),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 18),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 18),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.payment, color: Colors.white, size: 24),
-                          SizedBox(width: 12),
+                          const Icon(Icons.payment, color: Colors.white, size: 24),
+                          const SizedBox(width: 12),
                           Text(
-                            'إتمام الدفع',
-                            style: TextStyle(
+                            loc.completePayment,
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,

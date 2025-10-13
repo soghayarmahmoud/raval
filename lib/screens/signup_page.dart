@@ -1,6 +1,7 @@
 // In lib/screens/signup_page.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:store/l10n/app_localizations.dart';
 import 'package:store/screens/login_page.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -21,44 +22,34 @@ class _SignUpPageState extends State<SignUpPage> {
   bool _isLoading = false;
 
   Future<void> _submitForm() async {
+    final loc = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) {
-      return; // إذا لم تكن البيانات صحيحة، لا تكمل
+      return;
     }
     
     setState(() => _isLoading = true);
 
     try {
-      // 1. إنشاء المستخدم في Firebase Authentication
       final UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
-      // 2. تحديث اسم المستخدم (DisplayName)
       await userCredential.user?.updateDisplayName(_nameController.text.trim());
-
-      // TODO: 3. حفظ البيانات الإضافية (مثل رقم الهاتف) في Firestore
-      // await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
-      //   'name': _nameController.text.trim(),
-      //   'email': _emailController.text.trim(),
-      //   'phone': _phoneController.text.trim(),
-      // });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('تم إنشاء الحساب بنجاح!'), backgroundColor: Colors.green),
+          SnackBar(content: Text(loc.accountCreatedSuccessfully), backgroundColor: Colors.green),
         );
-        // العودة للصفحة السابقة وإرسال إشارة نجاح
         Navigator.pop(context, true);
       }
 
     } on FirebaseAuthException catch (e) {
-      // التعامل مع أخطاء Firebase الشائعة
-      String message = 'حدث خطأ ما.';
+      String message = loc.somethingWentWrong;
       if (e.code == 'weak-password') {
-        message = 'كلمة السر ضعيفة جدًا.';
+        message = loc.weakPassword;
       } else if (e.code == 'email-already-in-use') {
-        message = 'هذا البريد الإلكتروني مستخدم بالفعل.';
+        message = loc.emailAlreadyInUse;
       }
        if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -66,10 +57,9 @@ class _SignUpPageState extends State<SignUpPage> {
         );
       }
     } catch (e) {
-      // التعامل مع أي أخطاء أخرى
        if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('فشل إنشاء الحساب: ${e.toString()}'), backgroundColor: Colors.red),
+          SnackBar(content: Text('${loc.failedToCreateAccount}${e.toString()}'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -81,8 +71,9 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('إنشاء حساب جديد')),
+      appBar: AppBar(title: Text(loc.createNewAccount)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -93,38 +84,38 @@ class _SignUpPageState extends State<SignUpPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  TextFormField(controller: _nameController, decoration: const InputDecoration(labelText: 'الاسم الكامل', border: OutlineInputBorder()), validator: (v) => (v == null || v.isEmpty) ? 'الحقل مطلوب' : null),
+                  TextFormField(controller: _nameController, decoration: InputDecoration(labelText: loc.fullName, border: OutlineInputBorder()), validator: (v) => (v == null || v.isEmpty) ? loc.fieldRequired : null),
                   const SizedBox(height: 16),
-                  TextFormField(controller: _phoneController, decoration: const InputDecoration(labelText: 'رقم الهاتف', border: OutlineInputBorder()), keyboardType: TextInputType.phone, validator: (v) => (v == null || v.isEmpty) ? 'الحقل مطلوب' : null),
+                  TextFormField(controller: _phoneController, decoration: InputDecoration(labelText: loc.phoneNumber, border: OutlineInputBorder()), keyboardType: TextInputType.phone, validator: (v) => (v == null || v.isEmpty) ? loc.fieldRequired : null),
                   const SizedBox(height: 16),
-                  TextFormField(controller: _emailController, decoration: const InputDecoration(labelText: 'البريد الإلكتروني', border: OutlineInputBorder()), keyboardType: TextInputType.emailAddress, validator: (v) => (v == null || !v.contains('@')) ? 'بريد غير صحيح' : null),
+                  TextFormField(controller: _emailController, decoration: InputDecoration(labelText: loc.email_hint, border: OutlineInputBorder()), keyboardType: TextInputType.emailAddress, validator: (v) => (v == null || !v.contains('@')) ? loc.invalidEmail : null),
                   const SizedBox(height: 16),
-                  TextFormField(controller: _passwordController, obscureText: true, decoration: const InputDecoration(labelText: 'كلمة السر', border: OutlineInputBorder()), validator: (v) => (v == null || v.length < 6) ? 'كلمة السر قصيرة جدًا' : null),
+                  TextFormField(controller: _passwordController, obscureText: true, decoration: InputDecoration(labelText: loc.password_hint, border: OutlineInputBorder()), validator: (v) => (v == null || v.length < 6) ? loc.passwordTooShort : null),
                   const SizedBox(height: 16),
-                  TextFormField(controller: _confirmPasswordController, obscureText: true, decoration: const InputDecoration(labelText: 'تأكيد كلمة السر', border: OutlineInputBorder()), validator: (v) => v != _passwordController.text ? 'كلمتا السر غير متطابقتين' : null),
+                  TextFormField(controller: _confirmPasswordController, obscureText: true, decoration: InputDecoration(labelText: loc.confirmPassword, border: OutlineInputBorder()), validator: (v) => v != _passwordController.text ? loc.passwordsDoNotMatch : null),
                   const SizedBox(height: 30),
                   ElevatedButton(
                     onPressed: _isLoading ? null : _submitForm,
                     style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 15)),
                     child: _isLoading
                       ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white,))
-                      : const Text('إنشاء الحساب', style: TextStyle(fontSize: 18)),
+                      : Text(loc.createAccount, style: TextStyle(fontSize: 18)),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            _buildDivider(),
+            _buildDivider(context),
             const SizedBox(height: 24),
             _buildSocialLoginButton(
               iconPath: 'assets/icons/google.png',
-              label: 'المتابعة باستخدام Google',
+              label: loc.google_sign_in,
               onPressed: () { /* TODO: Implement Google Sign-Up */ },
             ),
             const SizedBox(height: 16),
             _buildSocialLoginButton(
               iconPath: 'assets/icons/apple.png',
-              label: 'المتابعة باستخدام Apple',
+              label: loc.apple_sign_in,
               isDarkMode: Theme.of(context).brightness == Brightness.dark,
               onPressed: () { /* TODO: Implement Apple Sign-Up */ },
             ),
@@ -132,10 +123,10 @@ class _SignUpPageState extends State<SignUpPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('لديك حساب بالفعل؟'),
+                Text(loc.haveAnAccount),
                 TextButton(
                   onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => const LoginPage())),
-                  child: const Text('سجل الدخول'),
+                  child: Text(loc.login),
                 ),
               ],
             ),
@@ -146,14 +137,14 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 }
 
-// --- ويدجتس مساعدة للتصميم العصري ---
-Widget _buildDivider() {
-  return const Row(
+Widget _buildDivider(BuildContext context) {
+  final loc = AppLocalizations.of(context)!;
+  return Row(
     children: [
       Expanded(child: Divider()),
       Padding(
         padding: EdgeInsets.symmetric(horizontal: 12.0),
-        child: Text('أو', style: TextStyle(color: Colors.grey)),
+        child: Text(loc.or, style: TextStyle(color: Colors.grey)),
       ),
       Expanded(child: Divider()),
     ],

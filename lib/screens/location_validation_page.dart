@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:store/l10n/app_localizations.dart';
 import '../models/address_model.dart';
 import '../services/address_service.dart';
 import 'add_address_page.dart';
@@ -10,10 +11,11 @@ class LocationValidationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AddressService addressService = AddressService();
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('تأكيد العنوان'),
+        title: Text(loc.confirmAddress),
         automaticallyImplyLeading: false,
       ),
       body: FutureBuilder<List<AddressModel>>(
@@ -30,14 +32,14 @@ class LocationValidationPage extends StatelessWidget {
                 children: [
                   const Icon(Icons.error_outline, size: 48, color: Colors.red),
                   const SizedBox(height: 16),
-                  const Text('حدث خطأ أثناء تحميل العناوين'),
+                  Text(loc.errorLoadingAddresses),
                   TextButton(
                     onPressed: () => Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                           builder: (_) => const LocationValidationPage()),
                     ),
-                    child: const Text('إعادة المحاولة'),
+                    child: Text(loc.retry),
                   ),
                 ],
               ),
@@ -53,14 +55,14 @@ class LocationValidationPage extends StatelessWidget {
                 children: [
                   const Icon(Icons.location_off, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
-                  const Text(
-                    'لم يتم إضافة أي عنوان',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text(
+                    loc.noAddressAdded,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'يرجى إضافة عنوان للمتابعة',
-                    style: TextStyle(color: Colors.grey),
+                  Text(
+                    loc.pleaseAddAddressToContinue,
+                    style: const TextStyle(color: Colors.grey),
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
@@ -72,7 +74,7 @@ class LocationValidationPage extends StatelessWidget {
                               const AddAddressPage(isRequired: true),
                         ),
                       );
-                      if (result == true) {
+                      if (result == true && context.mounted) {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
@@ -81,14 +83,13 @@ class LocationValidationPage extends StatelessWidget {
                       }
                     },
                     icon: const Icon(Icons.add_location),
-                    label: const Text('إضافة عنوان جديد'),
+                    label: Text(loc.addNewAddress),
                   ),
                 ],
               ),
             );
           }
 
-          // If we have addresses, show them and allow selection
           return Column(
             children: [
               Expanded(
@@ -117,7 +118,7 @@ class LocationValidationPage extends StatelessWidget {
                                   builder: (_) => const CheckoutPage()),
                             );
                           },
-                          child: const Text('اختيار'),
+                          child: Text(loc.select),
                         ),
                       ),
                     );
@@ -132,7 +133,7 @@ class LocationValidationPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(builder: (_) => const AddAddressPage()),
                     );
-                    if (result == true) {
+                    if (result == true && context.mounted) {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
@@ -141,7 +142,7 @@ class LocationValidationPage extends StatelessWidget {
                     }
                   },
                   icon: const Icon(Icons.add),
-                  label: const Text('إضافة عنوان جديد'),
+                  label: Text(loc.addNewAddress),
                 ),
               ),
             ],

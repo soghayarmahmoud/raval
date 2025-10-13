@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:store/l10n/app_localizations.dart';
 import '../models/address_model.dart';
 import '../services/address_service.dart';
 
@@ -23,14 +24,6 @@ class _AddAddressPageState extends State<AddAddressPage>
   String? _selectedGovernorate;
   final _nameController = TextEditingController();
   final _detailsController = TextEditingController();
-  final List<String> _kuwaitGovernorates = [
-    'العاصمة',
-    'حولي',
-    'الفروانية',
-    'الأحمدي',
-    'مبارك الكبير',
-    'الجهراء'
-  ];
 
   // Map variables
   final MapController _mapController = MapController();
@@ -67,13 +60,12 @@ class _AddAddressPageState extends State<AddAddressPage>
         await showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('السماح بالوصول للموقع'),
-            content: const Text(
-                'نحتاج إلى الوصول إلى موقعك لتحديد عنوانك بدقة. يرجى تفعيل خدمة الموقع من إعدادات التطبيق.'),
+            title: Text(AppLocalizations.of(context)!.allowLocationAccess),
+            content: Text(AppLocalizations.of(context)!.locationAccessReason),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('حسناً'),
+                child: Text(AppLocalizations.of(context)!.ok),
               ),
             ],
           ),
@@ -91,9 +83,9 @@ class _AddAddressPageState extends State<AddAddressPage>
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
             content:
-                Text('حدث خطأ أثناء تحديد موقعك. يرجى المحاولة مرة أخرى.')),
+                Text(AppLocalizations.of(context)!.locationError)),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -112,12 +104,12 @@ class _AddAddressPageState extends State<AddAddressPage>
       final newAddress = AddressModel(
         id: '', // Will be set by Firestore
         name: _nameController.text.isEmpty
-            ? 'العنوان الرئيسي'
+            ? AppLocalizations.of(context)!.mainAddress
             : _nameController.text,
         details: _tabController.index == 0
             ? _detailsController.text
-            : 'تم تحديد الموقع على الخريطة',
-        governorate: _selectedGovernorate ?? 'غير محدد',
+            : AppLocalizations.of(context)!.locationSetOnMap,
+        governorate: _selectedGovernorate ?? AppLocalizations.of(context)!.notSet,
         latitude: _currentCenter.latitude,
         longitude: _currentCenter.longitude,
       );
@@ -126,15 +118,15 @@ class _AddAddressPageState extends State<AddAddressPage>
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم حفظ العنوان بنجاح')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.addressSavedSuccess)),
       );
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
             content:
-                Text('حدث خطأ أثناء حفظ العنوان. يرجى المحاولة مرة أخرى.')),
+                Text(AppLocalizations.of(context)!.addressSaveError)),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -143,11 +135,21 @@ class _AddAddressPageState extends State<AddAddressPage>
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    final List<String> _kuwaitGovernorates = [
+      localizations.governorateAlAsimah,
+      localizations.governorateHawalli,
+      localizations.governorateFarwaniya,
+      localizations.governorateAhmadi,
+      localizations.governorateMubarakAlKabeer,
+      localizations.governorateJahra
+    ];
+
     return WillPopScope(
       onWillPop: () async {
         if (widget.isRequired) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('يجب إضافة عنوان للمتابعة')),
+            SnackBar(content: Text(localizations.addAddressToContinue)),
           );
           return false;
         }
@@ -155,13 +157,13 @@ class _AddAddressPageState extends State<AddAddressPage>
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('إضافة عنوان جديد'),
+          title: Text(localizations.addAddressTitle),
           automaticallyImplyLeading: !widget.isRequired,
           bottom: TabBar(
             controller: _tabController,
-            tabs: const [
-              Tab(icon: Icon(Icons.edit), text: 'إدخال يدوي'),
-              Tab(icon: Icon(Icons.map_outlined), text: 'تحديد من الخريطة'),
+            tabs: [
+              Tab(icon: Icon(Icons.edit), text: localizations.manualEntry),
+              Tab(icon: Icon(Icons.map_outlined), text: localizations.selectFromMap),
             ],
           ),
         ),
@@ -180,15 +182,15 @@ class _AddAddressPageState extends State<AddAddressPage>
                         children: [
                           TextFormField(
                             controller: _nameController,
-                            decoration: const InputDecoration(
-                              labelText: 'اسم العنوان (مثل: المنزل، العمل)',
+                            decoration: InputDecoration(
+                              labelText: localizations.addressNameHint,
                               border: OutlineInputBorder(),
                             ),
                           ),
                           const SizedBox(height: 16),
                           DropdownButtonFormField<String>(
-                            decoration: const InputDecoration(
-                              labelText: 'المحافظة',
+                            decoration: InputDecoration(
+                              labelText: localizations.governorate,
                               border: OutlineInputBorder(),
                             ),
                             initialValue: _selectedGovernorate,
@@ -199,19 +201,19 @@ class _AddAddressPageState extends State<AddAddressPage>
                             onChanged: (value) =>
                                 setState(() => _selectedGovernorate = value),
                             validator: (value) =>
-                                value == null ? 'اختر محافظة' : null,
+                                value == null ? localizations.selectGovernorate : null,
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: _detailsController,
-                            decoration: const InputDecoration(
-                              labelText: 'تفاصيل العنوان (شارع، قطعة، منزل...)',
+                            decoration: InputDecoration(
+                              labelText: localizations.addressDetailsHint,
                               border: OutlineInputBorder(),
                             ),
                             maxLines: 3,
                             validator: (value) =>
                                 (value == null || value.isEmpty)
-                                    ? 'أدخل تفاصيل العنوان'
+                                    ? localizations.enterAddressDetails
                                     : null,
                           ),
                         ],
@@ -266,7 +268,7 @@ class _AddAddressPageState extends State<AddAddressPage>
               ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: _saveAddress,
-          label: const Text('حفظ العنوان'),
+          label: Text(localizations.saveAddress),
           icon: const Icon(Icons.save),
         ),
       ),

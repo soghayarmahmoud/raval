@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:store/l10n/app_localizations.dart';
 import 'package:store/models/product_model.dart';
 import 'package:store/providers/favorites_provider.dart';
 import 'package:store/screens/product_detail_page.dart';
@@ -10,19 +11,17 @@ class FavoritesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // استدعاء provider الخاص بالمفضلة للاستماع للتغييرات
+    final loc = AppLocalizations.of(context)!;
     final favoritesProvider = Provider.of<FavoritesProvider>(context);
     final favoriteItems = favoritesProvider.favoriteItems;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('المفضلة'),
+        title: Text(loc.favorites),
       ),
       body:
-          // التحقق إذا كانت قائمة المفضلة فارغة
           favoriteItems.isEmpty
               ? Center(
-                  // عرض رسالة للمستخدم في حالة عدم وجود منتجات
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -30,34 +29,30 @@ class FavoritesPage extends StatelessWidget {
                           size: 80, color: Colors.grey[400]),
                       const SizedBox(height: 16),
                       Text(
-                        'قائمة المفضلة فارغة',
+                        loc.favoritesListIsEmpty,
                         style: TextStyle(fontSize: 20, color: Colors.grey[600]),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'أضف منتجاتك التي تحبها بالضغط على أيقونة القلب',
+                      Text(
+                        loc.addToFavoritesHint,
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 16, color: Colors.grey),
                       ),
                     ],
                   ),
                 )
-              // إذا لم تكن فارغة، قم بعرض قائمة المنتجات
               : ListView.builder(
                   padding:
                       const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                   itemCount: favoriteItems.length,
                   itemBuilder: (context, index) {
                     final product = favoriteItems[index];
-                    // استخدام ويدجت مخصصة لعرض كل منتج
                     return _FavoriteItemCard(
                       product: product,
                       onRemove: () {
-                        // عند الضغط على زر الحذف، يتم استدعاء الدالة من الـ provider
                         favoritesProvider.toggleFavorite(product);
                       },
                       onTap: () {
-                        // عند الضغط على المنتج نفسه، يتم الانتقال لصفحة التفاصيل
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -72,7 +67,6 @@ class FavoritesPage extends StatelessWidget {
   }
 }
 
-/// ويدجت مخصصة لعرض كارت المنتج في صفحة المفضلة
 class _FavoriteItemCard extends StatelessWidget {
   final ProductModel product;
   final VoidCallback onRemove;
@@ -86,6 +80,7 @@ class _FavoriteItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: onTap,
       child: Card(
@@ -96,7 +91,6 @@ class _FavoriteItemCard extends StatelessWidget {
           padding: const EdgeInsets.all(10.0),
           child: Row(
             children: [
-              // صورة المنتج
               ClipRRect(
                 borderRadius: BorderRadius.circular(8.0),
                 child: Image.network(
@@ -109,7 +103,6 @@ class _FavoriteItemCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              // اسم وسعر المنتج
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,7 +116,7 @@ class _FavoriteItemCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '${product.price.toStringAsFixed(2)} EGP',
+                      '${product.price.toStringAsFixed(2)} ${loc.currency}',
                       style: TextStyle(
                           fontSize: 15,
                           color: Theme.of(context).primaryColor,
@@ -133,11 +126,10 @@ class _FavoriteItemCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              // زر الحذف من المفضلة
               IconButton(
                 icon: const Icon(Icons.favorite, color: AppColors.primaryPink),
                 onPressed: onRemove,
-                tooltip: 'إزالة من المفضلة',
+                tooltip: loc.removeFromFavorites,
               ),
             ],
           ),

@@ -1,6 +1,7 @@
 // In lib/screens/home_page.dart
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:store/l10n/app_localizations.dart';
 import 'package:store/screens/category_product_page.dart';
 import 'package:store/services/cart_service.dart';
 import 'package:store/screens/cart_page.dart';
@@ -41,21 +42,21 @@ class HomeDataService {
     ];
   }
 
-  List<CategoryModel> getCategories() {
+  List<CategoryModel> getCategories(AppLocalizations loc) {
     return [
-      CategoryModel(id: 'c1', name: 'الكل'),
-      CategoryModel(id: 'c2', name: 'بناتي'),
-      CategoryModel(id: 'c3', name: 'ولادي'),
-      CategoryModel(id: 'c4', name: 'بيبي'),
-      CategoryModel(id: 'c5', name: 'تنزيلات'),
+      CategoryModel(id: 'c1', name: loc.category_all),
+      CategoryModel(id: 'c2', name: loc.category_girls),
+      CategoryModel(id: 'c3', name: loc.category_boys),
+      CategoryModel(id: 'c4', name: loc.category_baby),
+      CategoryModel(id: 'c5', name: loc.category_sales),
     ];
   }
 
-  List<ProductModel> getNewArrivals() {
+  List<ProductModel> getNewArrivals(AppLocalizations loc) {
     return [
       ProductModel(
         id: 'p1',
-        name: 'فستان بناتي ربيعي',
+        name: loc.springDress,
         price: 450.00,
         salePrice: 399.00,
         imageUrl:
@@ -65,63 +66,63 @@ class HomeDataService {
           'https://img.faballey.com/images/Product/AIC00007L/4.jpg',
         ],
         description:
-            'فستان بناتي رائع مصنوع من أجود أنواع القطن، مناسب لفصل الربيع والخريف. تصميم أنيق بألوان زاهية.',
-        tags: ['بناتي', 'فساتين', 'ربيعي'],
+            loc.springDressDescription,
+        tags: [loc.girls, loc.dresses, loc.spring],
         availableSizes: ['S', 'M', 'L'],
         availableColors: ['FF69B4', 'FFFFFF'],
         isFavorite: false,
         stock: 10,
-        category: 'بناتي',
+        category: loc.girls,
         additionalInfo: {
-          'المواد': 'قطن',
-          'الموسم': 'ربيع/خريف',
-          'نمط': 'كاجوال',
+          loc.materials: loc.cotton,
+          loc.season: loc.springAutumn,
+          loc.style: loc.casual,
         },
       ),
       ProductModel(
         id: 'p2',
-        name: 'طقم ولادي صيفي',
+        name: loc.boysSummerSet,
         price: 380.50,
         imageUrl:
             'https://images.pexels.com/photos/4263705/pexels-photo-4263705.jpeg',
         description:
-            'طقم ولادي مميز مناسب لفصل الصيف، خامة قطنية مريحة وألوان زاهية',
-        tags: ['ولادي', 'صيفي'],
+            loc.boysSummerSetDescription,
+        tags: [loc.boys, loc.summer],
         availableSizes: ['M', 'L', 'XL'],
         availableColors: ['0000FF'],
         isFavorite: false,
         stock: 15,
-        category: 'ولادي',
+        category: loc.boys,
         additionalInfo: {
-          'المواد': 'قطن',
-          'الموسم': 'صيف',
-          'نمط': 'سبورت',
+          loc.materials: loc.cotton,
+          loc.season: loc.summer,
+          loc.style: loc.sport,
         },
       ),
     ];
   }
 
-  List<ProductModel> getBestOffers() {
+  List<ProductModel> getBestOffers(AppLocalizations loc) {
     return [
       ProductModel(
         id: 'p4',
-        name: 'جاكيت شتوي',
+        name: loc.winterJacket,
         price: 600.00,
         imageUrl:
             'https://images.pexels.com/photos/34222783/pexels-photo-34222783.jpeg',
         description:
-            'جاكيت شتوي دافئ مناسب لفصل الشتاء، بتصميم عصري وخامة ممتازة',
-        tags: ['شتوي', 'ولادي'],
+            loc.winterJacketDescription,
+        tags: [loc.winter, loc.boys],
         availableSizes: ['S', 'M'],
         availableColors: ['000000'],
         isFavorite: false,
         stock: 8,
-        category: 'ولادي',
+        category: loc.boys,
         additionalInfo: {
-          'المواد': 'صوف وبوليستر',
-          'الموسم': 'شتاء',
-          'نمط': 'كاجوال',
-          'البطانة': 'مبطن',
+          loc.materials: loc.woolAndPolyester,
+          loc.season: loc.winter,
+          loc.style: loc.casual,
+          loc.lining: loc.lined,
         },
       ),
     ];
@@ -140,37 +141,50 @@ class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   final HomeDataService _dataService = HomeDataService();
   final CartService _cartService = CartService();
-  late List<CategoryModel> _categories;
+  List<CategoryModel>? _categories;
   int _cartItemCount = 0;
-  late TabController _tabController;
+  TabController? _tabController;
 
   @override
   void initState() {
     super.initState();
-    _categories = _dataService.getCategories();
     _loadCartCount();
+  }
 
-    _tabController = TabController(length: _categories.length, vsync: this);
-    _tabController.addListener(_handleTabSelection);
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_categories == null) {
+      _setupCategories();
+    }
+  }
+
+  void _setupCategories() {
+    final loc = AppLocalizations.of(context)!;
+    final categories = _dataService.getCategories(loc);
+    setState(() {
+      _categories = categories;
+      _tabController = TabController(length: _categories!.length, vsync: this);
+      _tabController!.addListener(_handleTabSelection);
+    });
   }
 
   @override
   void dispose() {
-    _tabController.removeListener(_handleTabSelection);
-    _tabController.dispose();
+    _tabController?.removeListener(_handleTabSelection);
+    _tabController?.dispose();
     super.dispose();
   }
 
   void _handleTabSelection() {
-    if (_tabController.indexIsChanging) {
-      if (_tabController.index != 0) {
-        final selectedCategory = _categories[_tabController.index];
+    final loc = AppLocalizations.of(context)!;
+    if (_tabController!.indexIsChanging) {
+      if (_tabController!.index != 0) {
+        final selectedCategory = _categories![_tabController!.index];
 
-        // في تطبيق حقيقي، ستقوم بجلب المنتجات من قاعدة البيانات بناءً على الصنف
-        // حاليًا، سنقوم بتمرير كل المنتجات كمثال
         final allProducts = [
-          ..._dataService.getNewArrivals(),
-          ..._dataService.getBestOffers()
+          ..._dataService.getNewArrivals(loc),
+          ..._dataService.getBestOffers(loc)
         ];
         final categoryProducts = allProducts
             .where((p) => p.tags.contains(selectedCategory.name))
@@ -187,8 +201,7 @@ class _HomePageState extends State<HomePage>
             ),
           ),
         ).then((_) {
-          // لمنع بقاء التاب معلمًا عند العودة
-          _tabController.animateTo(0);
+          _tabController!.animateTo(0);
         });
       }
     }
@@ -204,12 +217,13 @@ class _HomePageState extends State<HomePage>
   }
 
   void _addToCart(ProductModel product, int quantity) async {
+    final loc = AppLocalizations.of(context)!;
     await _cartService.addToCart(product, quantity);
     _loadCartCount();
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('تمت إضافة "${product.name}" إلى السلة')),
+        SnackBar(content: Text(loc.addedXToCart(product.name))),
       );
     }
   }
@@ -231,9 +245,13 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    if (_categories == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     return Scaffold(
       appBar: AppBar(
-        title: const Text('RAVAL',
+        title: Text(loc.appName,
             style: TextStyle(
                 fontFamily: 'Exo2',
                 fontWeight: FontWeight.bold,
@@ -246,24 +264,24 @@ class _HomePageState extends State<HomePage>
           ),
         ],
         bottom: TabBar(
-          controller: _tabController,
+          controller: _tabController!,
           isScrollable: true,
           tabs:
-              _categories.map((category) => Tab(text: category.name)).toList(),
+              _categories!.map((category) => Tab(text: category.name)).toList(),
           labelStyle:
               const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
         ),
       ),
-      // --- تم حذف TabBarView من هنا ---
       body: _buildCategoryPage(),
     );
   }
 
   Widget _buildCategoryPage() {
+    final loc = AppLocalizations.of(context)!;
     final banners = _dataService.getBanners();
-    final newArrivals = _dataService.getNewArrivals();
-    final bestOffers = _dataService.getBestOffers();
+    final newArrivals = _dataService.getNewArrivals(loc);
+    final bestOffers = _dataService.getBestOffers(loc);
 
     return SingleChildScrollView(
       child: Column(
@@ -291,8 +309,8 @@ class _HomePageState extends State<HomePage>
             options: CarouselOptions(
                 height: 220, autoPlay: true, viewportFraction: 1.0),
           ),
-          _buildProductSection(title: 'وصل حديثًا', products: newArrivals),
-          _buildProductSection(title: 'أفضل العروض', products: bestOffers),
+          _buildProductSection(title: loc.newArrivals, products: newArrivals),
+          _buildProductSection(title: loc.bestOffers, products: bestOffers),
           const SizedBox(height: 20),
         ],
       ),
@@ -330,8 +348,6 @@ class _HomePageState extends State<HomePage>
     );
   }
 }
-
-// --- Helper Widgets ---
 
 class _CartIconWithBadge extends StatelessWidget {
   final int itemCount;
@@ -385,6 +401,7 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: onCardTap,
       child: Container(
@@ -455,7 +472,7 @@ class ProductCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Text(
-                '${product.price.toStringAsFixed(2)} EGP',
+                '${product.price.toStringAsFixed(2)} ${loc.currency}',
                 style: TextStyle(
                     color: Theme.of(context).primaryColor,
                     fontSize: 14,
